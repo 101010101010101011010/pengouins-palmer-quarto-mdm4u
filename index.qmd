@@ -1,0 +1,144 @@
+---
+title: Comprendre les pingouins Palmer
+subtitle: Une analyse statistique de la physiologie pingouinale
+format: pdf
+toc: true
+highlight-style: github
+authors:
+  - name: Nicolas Kmita
+    affiliation: École secondaire Franco-Cité
+bibliography: references.bib
+nocite: |
+  @gorman14, @horst20, @adelie9, @chinstrap9, @gentoo9
+---
+
+```{r}
+# Préparatipn de librairies et installations variés
+
+# install.packages("palmerpenguins")
+# install.packages("tidyverse")
+# install.packages("languageserver")
+
+library(palmerpenguins)
+library("tidyverse")
+```
+
+
+
+MDM4U-01
+
+M. Chabot
+
+10 octobre 2024
+
+{{< pagebreak >}}
+
+## Variables
+
+Il y a 8 variables dont les données ont été récoltés par la station Palmer:
+
+### Espèce
+
+Une variable catégorique nominale dénotant nom de l'espèce du pingouin mesuré, soit `Adélie`, `Chistrap` ou `Gentoo`.
+
+### Isle
+
+Une variable catégorique nominale dénotant l'isle dans l'archipel Palmer sur laquelle vit le pingouin mesuré, soit `Biscoe`, `Dream` ou `Torgersen`.
+
+### Longueur du bec (mm)
+
+Une variable numérique continue dénotant la longueur du bec du pingouin mesuré, en millimètres.
+
+### Profondeur du bec (mm)
+
+Une variable numérique continue dénotant la profondeur du bec du pingouin mesuré, en millimètres.
+
+### Longueure de la nageoire (mm)
+
+Une variable numérique continue, arrondie à l'unité près, dénotant la longueur de la nageoire du pingouin mesuré, en millimètres.
+
+### Masse corporelle (g)
+
+Une variable numérique continue, arrondie à l'unité près, dénotant la masse corporelle du pingouin mesuré, en grammes.
+
+### Sexe
+
+Une variable catégorique nominale dénotant le sexe du pingouin mesuré, soit `femelle` ou `mâle`.
+
+### Année
+
+Une variable numérique *discrète, donnée à l'unité près, indiquant l'année de la prise de mesure du pingouin.
+
+## Analyse
+
+### Est-ce qu’il y a des valeurs manquantes?
+
+### Est-ce qu’il y a des valeurs aberrantes?
+
+### Quelle est le sommaire statistique de chaque variable?
+
+o Qualitative : Fréquence, NA, mode.
+
+o Quantitative :
+
+### Min, moyenne, médiane, mode, max, quartiles, écart type.
+
+### Quelle île héberge le plus de pingouins?
+
+L'îsle hébergeant le plus de pinguoins peut être approximativement déterminée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
+
+```{r fig-freq-isle, echo = FALSE, fig.cap = 'La fréquence des pingouins Palmer par île, selon les espèces, comparés entre-eux', out.width='100%', fig.align='center'}
+
+ggplot(penguins, aes(island)) +
+  geom_histogram(stat="count", aes(fill = species), color = "black") +
+  # Couleurs de remplissage
+  scale_fill_manual(values = alpha(c("#4e4e4e", "#929292", "#d6d6d6"), 1)) +
+  # Intervales
+  scale_y_continuous(
+    limits = c(0, 180),
+    expand = c(0, 0),
+    breaks = seq(from = 0, to = 180, by = 60),
+    minor_breaks = seq(from = 0, to = 180, by = 10)
+  ) +
+  # Thèmes
+  theme_classic() +
+  theme(
+    panel.grid.major.y = element_line(color = "grey"),
+    panel.grid.minor.y = element_line(color = "grey90"),
+  ) +
+  # Renomer les axes
+  labs(
+    title = "Fréquence des îles de pingouins Palmer",
+    x = "Île",
+    y = "Fréquence",
+    fill = "Espèce"
+  )
+```
+
+```{r}
+# Différences entre les fréquences de chaque île, à utiliser en-texte
+bis_drea_isle_diff <- sum(penguins$island == "Biscoe") - sum(penguins$island == "Dream")
+drea_torg_isle_diff <- sum(penguins$island == "Dream") - sum(penguins$island == "Torgersen")
+```
+
+L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dream, qui en comporte `{r} drea_torg_isle_diff` de plus que l'île Torgersen. L'île Biscoe a donc une bonne avance sur les autres en terme de population de pingoins, toutefois ce pourrait aussi être que les autres îles n'ont pas eus autant de couvrage par l'équipe d'échantillonnage.
+a
+### Quelle est la relation entre les espèces et l’île?
+
+### Quelles sont les relations entre le sexe, l’espèce et l’île?
+
+### Quelle est la relation entre le sexe et la masse?
+
+### Quelle est la relation entre l’espèce et la masse?
+
+### Quelle est la relation entre les dimensions du bec et la dimension de la nageoire?
+
+### Est-ce qu’il y a des tendances temporelles?
+
+
+{{< pagebreak >}}
+
+## Références
+
+::: {#refs}
+:::
