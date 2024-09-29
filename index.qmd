@@ -1,7 +1,8 @@
 ---
 title: Comprendre les pingouins Palmer
 subtitle: Une analyse statistique de la physiologie pingouinale
-format: pdf
+format:
+  pdf
 toc: true
 highlight-style: github
 authors:
@@ -9,7 +10,8 @@ authors:
     affiliation: École secondaire Franco-Cité
 bibliography: references.bib
 nocite: |
-  @gorman14, @horst20, @adelie9, @chinstrap9, @gentoo9
+  @*
+notebook-links: false
 ---
 
 ```{r}
@@ -18,9 +20,27 @@ nocite: |
 # install.packages("palmerpenguins")
 # install.packages("tidyverse")
 # install.packages("languageserver")
+# install.packages("ggbeeswarm")
+# install.packages("viridis")
 
 library(palmerpenguins)
 library("tidyverse")
+library(ggbeeswarm) # Génère des graphique d'essaim d'abeille
+library(viridis) # Couleurs pouvant être mieux perçus
+
+# citation()
+# citation("palmerpenguins")
+# citation("tidyverse")
+# citation("ggbeeswarm")
+```
+
+```{r}
+# Préparation aesthétique
+
+theme_set(theme_classic())
+
+set.seed(3142)
+
 ```
 
 
@@ -37,35 +57,35 @@ M. Chabot
 
 Il y a 8 variables dont les données ont été récoltés par la station Palmer:
 
-### Espèce
+### Espèce --- `species`
 
 Une variable catégorique nominale dénotant nom de l'espèce du pingouin mesuré, soit `Adélie`, `Chistrap` ou `Gentoo`.
 
-### Isle
+### Isle --- `island`
 
 Une variable catégorique nominale dénotant l'isle dans l'archipel Palmer sur laquelle vit le pingouin mesuré, soit `Biscoe`, `Dream` ou `Torgersen`.
 
-### Longueur du bec (mm)
+### Longueur du bec (mm) --- `bill_length_mm`
 
 Une variable numérique continue dénotant la longueur du bec du pingouin mesuré, en millimètres.
 
-### Profondeur du bec (mm)
+### Profondeur du bec (mm) --- `bill_depth_mm`
 
 Une variable numérique continue dénotant la profondeur du bec du pingouin mesuré, en millimètres.
 
-### Longueure de la nageoire (mm)
+### Longueure de la nageoire (mm) --- `flipper_length_mm`
 
 Une variable numérique continue, arrondie à l'unité près, dénotant la longueur de la nageoire du pingouin mesuré, en millimètres.
 
-### Masse corporelle (g)
+### Masse corporelle (g) --- `body_mass_g`
 
 Une variable numérique continue, arrondie à l'unité près, dénotant la masse corporelle du pingouin mesuré, en grammes.
 
-### Sexe
+### Sexe --- `sex`
 
 Une variable catégorique nominale dénotant le sexe du pingouin mesuré, soit `femelle` ou `mâle`.
 
-### Année
+### Année --- `year`
 
 Une variable numérique *discrète, donnée à l'unité près, indiquant l'année de la prise de mesure du pingouin.
 
@@ -83,11 +103,101 @@ o Quantitative :
 
 ### Min, moyenne, médiane, mode, max, quartiles, écart type.
 
+```{r fig-violin-beclon, exho=FALSE, fig.cap='Longueurs de becs selon l\'espèce', out.width='100%', fig.align='center'}
+
+dfTab <- penguins %>% filter(!is.na(bill_length_mm)) %>% group_by(species) %>%
+  summarize(
+    y = max(bill_length_mm) + 1,
+    mean = mean(bill_length_mm),
+    sd = round(sd(bill_length_mm), digits = 2)
+  )
+
+ggplot(penguins) +
+  # Diagrammes
+  geom_violin(aes(species, bill_length_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(species, bill_length_mm, colour = sex), width = 0.3, alpha = 0.2) +
+
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
+  labs(
+    title = "Longueurs de becs par rapport à l'espèce",
+    x = "Espèce",
+    y = "Longueur du bec (mm)",
+    colour = "Sexe"
+  )
+```
+
+```{r fig-violin-becprof, exho=FALSE, fig.cap='Profondeurs de becs selon l\'espèce', out.width='100%', fig.align='center'}
+
+dfTab <- penguins %>% filter(!is.na(bill_depth_mm)) %>% group_by(species) %>%
+  summarize(
+    y = max(bill_depth_mm) + 0.2,
+    mean = mean(bill_depth_mm),
+    sd = round(sd(bill_depth_mm), digits = 2)
+  )
+
+ggplot(penguins) +
+  # Diagrammes
+  geom_violin(aes(species, bill_depth_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(species, bill_depth_mm, colour = sex), width = 0.3, alpha = 0.2) +
+  
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
+  labs(
+    title = "Profondeurs de becs par rapport à l'espèce",
+    x = "Espèce",
+    y = "Profondeur du bec (mm)",
+    colour = "Sexe"
+  )
+```
+
+```{r fig-violin-nagelon, exho=FALSE, fig.cap='Longueurs de nageoires selon l\'espèce', out.width='100%', fig.align='center'}
+
+dfTab <- penguins %>% filter(!is.na(flipper_length_mm)) %>% group_by(species) %>%
+  summarize(
+    y = max(flipper_length_mm) + 2,
+    mean = mean(flipper_length_mm),
+    sd = round(sd(flipper_length_mm), digits = 2)
+  )
+
+ggplot(penguins) +
+  # Diagrammes
+  geom_violin(aes(species, flipper_length_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(species, flipper_length_mm, colour = sex), width = 0.3, alpha = 0.2) +
+  
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
+  labs(
+    title = "Longueurs de nageoires par rapport à l'espèce",
+    x = "Espèce",
+    y = "Longueure de la nageoire (mm)",
+    colour = "Sexe"
+  )
+```
+
 ### Quelle île héberge le plus de pingouins?
 
-L'îsle hébergeant le plus de pinguoins peut être approximativement déterminée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
+L'île hébergeant le plus de pinguoins peut être estimée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
 
-```{r fig-freq-isle, echo = FALSE, fig.cap = 'La fréquence des pingouins Palmer par île, selon les espèces, comparés entre-eux', out.width='100%', fig.align='center'}
+```{r fig-freq-isle, echo=FALSE, fig.cap='La fréquence des pingouins Palmer par île, selon les espèces, comparés entre-eux', out.width='100%', fig.align='center'}
 
 ggplot(penguins, aes(island)) +
   geom_histogram(stat="count", aes(fill = species), color = "black") +
@@ -101,12 +211,11 @@ ggplot(penguins, aes(island)) +
     minor_breaks = seq(from = 0, to = 180, by = 10)
   ) +
   # Thèmes
-  theme_classic() +
   theme(
     panel.grid.major.y = element_line(color = "grey"),
     panel.grid.minor.y = element_line(color = "grey90"),
   ) +
-  # Renomer les axes
+  # Renomer tout
   labs(
     title = "Fréquence des îles de pingouins Palmer",
     x = "Île",
@@ -122,7 +231,7 @@ drea_torg_isle_diff <- sum(penguins$island == "Dream") - sum(penguins$island == 
 ```
 
 L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dream, qui en comporte `{r} drea_torg_isle_diff` de plus que l'île Torgersen. L'île Biscoe a donc une bonne avance sur les autres en terme de population de pingoins, toutefois ce pourrait aussi être que les autres îles n'ont pas eus autant de couvrage par l'équipe d'échantillonnage.
-a
+
 ### Quelle est la relation entre les espèces et l’île?
 
 ### Quelles sont les relations entre le sexe, l’espèce et l’île?
@@ -132,6 +241,22 @@ a
 ### Quelle est la relation entre l’espèce et la masse?
 
 ### Quelle est la relation entre les dimensions du bec et la dimension de la nageoire?
+
+En comparant 
+
+```{r fig-dots-becnage, echo=FALSE, fig.cap='La longueure de la nageoire pour la profondeur du bec, la longuer du bec et l\'espèce', out.width='100%', fig.align='center'}
+
+ggplot(penguins, aes(bill_length_mm, bill_depth_mm)) +
+  geom_point(aes(size = flipper_length_mm, colour = species), alpha = 0.3) +
+  # Renomer tout
+  labs(
+    title = "Longueure de la nageoire pour la profondeur\net longuer du bec et l'espèce",
+    x = "Longueur du bec (mm)",
+    y = "Profondeur du bec (mm)",
+    colour = "Espèce",
+    size = "Longueure de la\nnageoire (mm)"
+  )
+```
 
 ### Est-ce qu’il y a des tendances temporelles?
 
