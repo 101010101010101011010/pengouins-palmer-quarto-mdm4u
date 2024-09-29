@@ -103,7 +103,7 @@ o Quantitative :
 
 ### Min, moyenne, médiane, mode, max, quartiles, écart type.
 
-```{r fig-violin-beclon, exho=FALSE, fig.cap='Longueurs de becs selon l\'espèce', out.width='100%', fig.align='center'}
+```{r fig-violin-beclon, exho=FALSE, fig.cap='Longueurs de becs des pingouins Palmer, selon l\'espèce', out.width='100%', fig.align='center'}
 
 dfTab <- penguins %>% filter(!is.na(bill_length_mm)) %>% group_by(species) %>%
   summarize(
@@ -133,7 +133,7 @@ ggplot(penguins) +
   )
 ```
 
-```{r fig-violin-becprof, exho=FALSE, fig.cap='Profondeurs de becs selon l\'espèce', out.width='100%', fig.align='center'}
+```{r fig-violin-becprof, exho=FALSE, fig.cap='Profondeurs de becs des pingouins Palmer, selon l\'espèce', out.width='100%', fig.align='center'}
 
 dfTab <- penguins %>% filter(!is.na(bill_depth_mm)) %>% group_by(species) %>%
   summarize(
@@ -163,7 +163,7 @@ ggplot(penguins) +
   )
 ```
 
-```{r fig-violin-nagelon, exho=FALSE, fig.cap='Longueurs de nageoires selon l\'espèce', out.width='100%', fig.align='center'}
+```{r fig-violin-nagelon, exho=FALSE, fig.cap='Longueurs de nageoires des pingouins Palmer, selon l\'espèce', out.width='100%', fig.align='center'}
 
 dfTab <- penguins %>% filter(!is.na(flipper_length_mm)) %>% group_by(species) %>%
   summarize(
@@ -236,9 +236,45 @@ L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dre
 
 ### Quelles sont les relations entre le sexe, l’espèce et l’île?
 
-### Quelle est la relation entre le sexe et la masse?
+### Quelle est la relation entre le sexe et la masse, et l’espèce et la masse?
 
-### Quelle est la relation entre l’espèce et la masse?
+En omettant les non valeurs de sexe et de poids
+
+```{r fig-violin-masscats, exho=FALSE, fig.cap='Les masses corporelles, en kilogrammes, par rapport à l\'espèce et le sexe des pingouins Palmer', out.width='100%', fig.align='center'}
+
+dfTab <- penguins %>% mutate(body_mass_g = body_mass_g / 1000) %>% filter(!is.na(body_mass_g) & !is.na(sex)) %>% group_by(species, sex) %>%
+  summarize(
+    y = max(body_mass_g) + 0.1,
+    mean = mean(body_mass_g),
+    sd = round(sd(body_mass_g), digits = 2)
+  )
+
+dodgewidth <- 0.9
+
+ggplot(penguins %>% mutate(body_mass_g = body_mass_g / 1000) %>% filter(!is.na(body_mass_g) & !is.na(sex))) +
+  # Diagrammes
+  geom_violin(aes(x=species, y=body_mass_g, color=sex), position=position_dodge(width=dodgewidth), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(x=species, y=body_mass_g, colour=sex), dodge.width=dodgewidth, width = 0.12, alpha = 0.2) +
+
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, group=sex, y=mean, ymin=mean-sd, ymax=mean+sd), position=position_dodge(width=dodgewidth), width=.205, linewidth=.4, colour="black") +
+  geom_point(data=dfTab, aes(x=species, group=sex, y=mean), position=position_dodge(width=dodgewidth), size=0.6, colour="black") +
+
+  geom_errorbar(data=dfTab, aes(x=species, group=sex, y=mean, ymin=mean-sd, ymax=mean+sd), position=position_dodge(width=dodgewidth), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, group=sex, y=mean), position=position_dodge(width=dodgewidth), size=0.5, colour="red") +
+
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species, group=sex, y=y, parse=FALSE, label=sprintf("s = %.2f", dfTab$sd)), position=position_dodge(width=dodgewidth), vjust=0) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle")) +
+  labs(
+    title = "Masses corporelles (kg) par rapport à l'espèce et le sexe",
+    x = "Espèce",
+    y = "Masse corporelle (kg)",
+    colour = "Sexe"
+  )
+```
 
 ### Quelle est la relation entre les dimensions du bec et la dimension de la nageoire?
 
