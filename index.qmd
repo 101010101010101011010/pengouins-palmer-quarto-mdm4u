@@ -242,7 +242,7 @@ En omettant les non valeurs de sexe et de poids
 
 ```{r fig-violin-masscats, exho=FALSE, fig.cap='Les masses corporelles, en kilogrammes, par rapport à l\'espèce et le sexe des pingouins Palmer', out.width='100%', fig.align='center'}
 
-dfTab <- penguins %>% mutate(body_mass_g = body_mass_g / 1000) %>% filter(!is.na(body_mass_g) & !is.na(sex)) %>% group_by(species, sex) %>%
+dfTab <- penguins %>% mutate(body_mass_g = body_mass_g / 1000) %>% filter(!is.na(body_mass_g) | !is.na(sex)) %>% group_by(species, sex) %>%
   summarize(
     y = max(body_mass_g) + 0.1,
     mean = mean(body_mass_g),
@@ -251,7 +251,7 @@ dfTab <- penguins %>% mutate(body_mass_g = body_mass_g / 1000) %>% filter(!is.na
 
 dodgewidth <- 0.9
 
-ggplot(penguins %>% mutate(body_mass_g = body_mass_g / 1000) %>% filter(!is.na(body_mass_g) & !is.na(sex))) +
+ggplot(penguins %>% mutate(body_mass_g = body_mass_g / 1000) %>% filter(!is.na(body_mass_g) | !is.na(sex))) +
   # Diagrammes
   geom_violin(aes(x=species, y=body_mass_g, color=sex), position=position_dodge(width=dodgewidth), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
   geom_quasirandom(aes(x=species, y=body_mass_g, colour=sex), dodge.width=dodgewidth, width = 0.12, alpha = 0.2) +
@@ -282,15 +282,29 @@ En comparant
 
 ```{r fig-dots-becnage, echo=FALSE, fig.cap='La longueure de la nageoire pour la profondeur du bec, la longuer du bec et l\'espèce', out.width='100%', fig.align='center'}
 
-ggplot(penguins, aes(bill_length_mm, bill_depth_mm)) +
-  geom_point(aes(size = flipper_length_mm, colour = species), alpha = 0.3) +
+dfTab <- penguins %>% mutate(flipper_length_mm = flipper_length_mm / 10) %>% filter(!is.na(flipper_length_mm) | !is.na(sex)) %>% group_by(species) %>% select(species, bill_length_mm, bill_depth_mm, flipper_length_mm) %>%
+  summarize(
+    x = min((penguins %>% filter(!is.na(bill_length_mm)))$bill_length_mm) + ifelse(species == "Adelie", 0, ifelse(species == "Chinstrap", 10, 20)),
+    y = max(bill_depth_mm) + 0.1,
+    r = cor(bill_length_mm, bill_depth_mm),
+    r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared
+  )
+
+ggplot(penguins %>% mutate(flipper_length_mm = flipper_length_mm / 10) %>% filter(!is.na(flipper_length_mm) | !is.na(sex)), aes(bill_length_mm, bill_depth_mm)) +
+  geom_point(aes(size = flipper_length_mm, colour = species), alpha = 0.2) +
+
+  geom_smooth(method="lm",aes(color=species),se=TRUE, fill="grey80") +
+
+  geom_text(data=dfTab,aes(color=species, label=sprintf("R^2 == %.2f", r2), x=x, y=24),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+  geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x, y=23),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+
   # Renomer tout
   labs(
     title = "Longueure de la nageoire pour la profondeur\net longuer du bec et l'espèce",
     x = "Longueur du bec (mm)",
     y = "Profondeur du bec (mm)",
     colour = "Espèce",
-    size = "Longueure de la\nnageoire (mm)"
+    size = "Longueure de la\nnageoire (cm)"
   )
 ```
 
