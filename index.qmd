@@ -103,7 +103,7 @@ o Quantitative :
 
 ### Min, moyenne, médiane, mode, max, quartiles, écart type.
 
-```{r fig-violin-beclon, exho=FALSE, fig.cap='Longueurs de becs des pingouins Palmer, selon l\'espèce', out.width='100%', fig.align='center'}
+```{r fig-violin-beclon, exho=FALSE, fig.cap='Longueurs de becs des pingouins Palmer, selon l\'espèce. Les barres rouges indiquent l\'allonge de l\'écart type, les lignes noires horizontales de chaque violon indiquent les quartiles, et les points rouges sont les moyennes.', out.width='100%', fig.align='center'}
 
 dfTab <- penguins %>% filter(!is.na(bill_length_mm)) %>% group_by(species) %>%
   summarize(
@@ -133,7 +133,7 @@ ggplot(penguins) +
   )
 ```
 
-```{r fig-violin-becprof, exho=FALSE, fig.cap='Profondeurs de becs des pingouins Palmer, selon l\'espèce', out.width='100%', fig.align='center'}
+```{r fig-violin-becprof, exho=FALSE, fig.cap='Profondeurs de becs des pingouins Palmer, selon l\'espèce. Les barres rouges indiquent l\'allonge de l\'écart type, les lignes noires horizontales de chaque violon indiquent les quartiles, et les points rouges sont les moyennes.', out.width='100%', fig.align='center'}
 
 dfTab <- penguins %>% filter(!is.na(bill_depth_mm)) %>% group_by(species) %>%
   summarize(
@@ -163,7 +163,7 @@ ggplot(penguins) +
   )
 ```
 
-```{r fig-violin-nagelon, exho=FALSE, fig.cap='Longueurs de nageoires des pingouins Palmer, selon l\'espèce', out.width='100%', fig.align='center'}
+```{r fig-violin-nagelon, exho=FALSE, fig.cap='Longueurs de nageoires des pingouins Palmer, selon l\'espèce. Les barres rouges indiquent l\'allonge de l\'écart type, les lignes noires horizontales de chaque violon indiquent les quartiles, et les points rouges sont les moyennes.', out.width='100%', fig.align='center'}
 
 dfTab <- penguins %>% filter(!is.na(flipper_length_mm)) %>% group_by(species) %>%
   summarize(
