@@ -232,7 +232,7 @@ ggplot(sifted) +
   )
 ```
 
-### Quelle île héberge le plus de pingouins?
+### Quelle île héberge le plus de pingouins, et quels et la relation entre les espèces et l’île?
 
 L'île hébergeant le plus de pinguoins peut être estimée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
 
@@ -274,7 +274,9 @@ bis_drea_isle_diff <- sum(penguins$island == "Biscoe") - sum(penguins$island == 
 drea_torg_isle_diff <- sum(penguins$island == "Dream") - sum(penguins$island == "Torgersen")
 ```
 
-L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dream, qui en comporte `{r} drea_torg_isle_diff` de plus que l'île Torgersen. L'île Biscoe a donc une bonne avance sur les autres en terme de population de pingoins, toutefois ce pourrait aussi être que les autres îles n'ont pas eus autant de couvrage par l'équipe d'échantillonnage.
+L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dream, qui en comporte `{r} drea_torg_isle_diff` de plus que l'île Torgersen. L'île Biscoe a donc une bonne avance sur les autres en terme de population de pingouins, toutefois ce pourrait aussi être que les autres îles n'ont pas eus autant de couvrage par l'équipe d'échantillonnage.
+
+La @fig-freq-isle suggère également que les \adelie{}s sont la seule des trois espèces à se situer sur plus d'une des îles mesurées. Il se pourrait plusieurs raisons pour ceci, par exemple une préférence nomade, mais sans des recherches plus approfondies c'est entièrement incertain. Il est à noter qu'à l'exception de l'île Torgersen, les \adelie{}s forment la minoritée et ne sont donc l'espèce pinguinale primaire que sur une des trois îles.
 
 ### Quelle est la relation entre les espèces et l’île?
 
