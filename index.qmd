@@ -2,7 +2,11 @@
 title: Comprendre les pingouins Palmer
 subtitle: Une analyse statistique de la physiologie pingouinale
 format:
-  pdf
+  pdf:
+    include-in-header:
+      - text: |
+          \usepackage{xcolor}
+      - macros.tex
 toc: true
 highlight-style: github
 authors:
@@ -39,11 +43,21 @@ library(viridis) # Couleurs pouvant être mieux perçus
 
 theme_set(theme_classic())
 
+# Échelle de couleur des pingouins Palmer
+penguin_colours <- c("darkorange","purple","cyan4")
+names(penguin_colours) <- levels(penguins$species)
+penguin_colour_scale <- function(fill = FALSE) {
+  if (fill) {
+    return (scale_fill_manual(name = "Espèce", values = penguin_colours))
+  }
+
+  return (scale_colour_manual(name = "Espèce", values = penguin_colours))
+}
+
+# Utilisation d'une graine aléatoire déterminée
 set.seed(3142)
 
 ```
-
-
 
 MDM4U-01
 
@@ -59,7 +73,7 @@ Il y a 8 variables dont les données ont été récoltés par la station Palmer:
 
 ### Espèce --- `species`
 
-Une variable catégorique nominale dénotant nom de l'espèce du pingouin mesuré, soit `Adélie`, `Chistrap` ou `Gentoo`.
+Une variable catégorique nominale dénotant nom de l'espèce du pingouin mesuré, soit \adelie{}, \chinstrap{} ou \gentoo{}.
 
 ### Isle --- `island`
 
@@ -205,6 +219,9 @@ ggplot(sifted) +
   # Anotation de l'écart type
   geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
 
+  # Thèmes
+  penguin_colour_scale() +
+
   # Anotations
   scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
   labs(
@@ -226,8 +243,7 @@ sifted <-
 
 ggplot(sifted, aes(island)) +
   geom_histogram(stat="count", aes(fill = species), color = "black") +
-  # Couleurs de remplissage
-  scale_fill_manual(values = alpha(c("#4e4e4e", "#929292", "#d6d6d6"), 1)) +
+  
   # Intervales
   scale_y_continuous(
     limits = c(0, 180),
@@ -235,11 +251,14 @@ ggplot(sifted, aes(island)) +
     breaks = seq(from = 0, to = 180, by = 60),
     minor_breaks = seq(from = 0, to = 180, by = 10)
   ) +
+
   # Thèmes
   theme(
     panel.grid.major.y = element_line(color = "grey"),
     panel.grid.minor.y = element_line(color = "grey90"),
   ) +
+  penguin_colour_scale(TRUE) +
+
   # Renomer tout
   labs(
     title = "Fréquence des îles de pingouins Palmer",
@@ -356,6 +375,9 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
   geom_text(data=dfTab,aes(color=species, label=sprintf("R^2 == %.2f", r2), x=x, y=24),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
   geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x, y=23),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
 
+  # Thèmes
+  penguin_colour_scale() +
+
   # Renomer tout
   labs(
     title = "Longueure de la nageoire pour la profondeur\net longuer du bec et l'espèce",
@@ -403,6 +425,9 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
 
   geom_text(data=dfTab,aes(color=species, label=sprintf("R^2 == %.2f", r2), x=x, y=24),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
   geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x, y=23),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+
+  # Thèmes
+  penguin_colour_scale() +
 
   # Renomer tout
   labs(
