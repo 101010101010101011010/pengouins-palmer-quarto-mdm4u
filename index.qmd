@@ -282,7 +282,34 @@ L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dre
 
 ### Quelle est la relation entre le sexe et la masse, et l’espèce et la masse?
 
-En omettant les non valeurs de sexe et de poids
+```{r}
+# Moyennes des masses de chaque espèce, à utiliser en-texte
+
+sifted <-
+  penguins %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000
+  ) %>%
+  filter(
+    !is.na(body_mass_g) &
+    !is.na(sex)
+  )
+
+penguin_mass_avgs <-
+  sifted %>%
+  group_by(
+    species
+  ) %>%
+  summarize(
+    mean = mean(body_mass_g)
+  ) %>%
+  select(
+    species,
+    mean
+  )
+```
+
+En omettant les valeurs lorsque le sexe ou le poids sont nulles, il est d'abord évident, dans la @fig-violin-masscats, que les mâles sont, en moyenne, plus pesants que les femelles. Ceci est le cas pour les trois espèces analysés.
 
 ```{r fig-violin-masscats, exho=FALSE, fig.cap='Les masses corporelles, en kilogrammes, par rapport à l\'espèce et le sexe des pingouins Palmer', out.width='100%', fig.align='center'}
 
@@ -334,6 +361,8 @@ ggplot(sifted) +
     colour = "Sexe"
   )
 ```
+
+Les \adelie{}s et \chinstrap{}s sont ensuite similaires en terme de masse. Les \gentoo{}s, quants à eux, pèsent considérablement plus à `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Adelie",]$mean, 2)` fois la masse des \adelie{}s et `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Chinstrap",]$mean, 2)` fois la masse des \chinstrap{}s.
 
 ### Quelle est la relation entre les dimensions du bec et la dimension de la nageoire?
 
