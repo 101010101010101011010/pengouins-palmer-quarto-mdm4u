@@ -19,6 +19,21 @@ notebook-links: false
 ---
 
 ```{r}
+# Assurer l'utilisation des virgules par les sorties
+
+knit_print.numeric = function(x, ...) {
+  prettyNum(x, decimal.mark=",")
+}
+
+registerS3method(
+  "knit_print", "numeric", knit_print.numeric,
+  envir = asNamespace("knitr")
+)
+```
+
+`{r} 1234.567`
+
+```{r}
 # Préparatipn de librairies et installations variés
 
 # install.packages("palmerpenguins")
@@ -143,6 +158,16 @@ ggplot(sifted) +
   # Anotation de l'écart type
   geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
 
+  # Thèmes
+  theme(
+    legend.position = c(0.10, 0.80),
+    legend.background = element_rect(colour = "black")
+  ) +
+  theme(
+    panel.grid.major.y = element_line(color = "#00000011"),
+    panel.grid.minor.y = element_line(color = "#0000000f"),
+  ) +
+
   # Anotations
   scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
   labs(
@@ -178,6 +203,16 @@ ggplot(sifted) +
   geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
   # Anotation de l'écart type
   geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Thèmes
+  theme(
+    legend.position = c(0.90, 0.80),
+    legend.background = element_rect(colour = "black")
+  ) +
+  theme(
+    panel.grid.major.y = element_line(color = "#00000011"),
+    panel.grid.minor.y = element_line(color = "#0000000f"),
+  ) +
 
   # Anotations
   scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
@@ -220,7 +255,14 @@ ggplot(sifted) +
   geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
 
   # Thèmes
-  penguin_colour_scale() +
+  theme(
+    legend.position = c(0.90, 0.25),
+    legend.background = element_rect(colour = "black")
+  ) +
+  theme(
+    panel.grid.major.y = element_line(color = "#00000011"),
+    panel.grid.minor.y = element_line(color = "#0000000f"),
+  ) +
 
   # Anotations
   scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
@@ -258,6 +300,10 @@ ggplot(sifted, aes(island)) +
     panel.grid.minor.y = element_line(color = "grey90"),
   ) +
   penguin_colour_scale(TRUE) +
+  theme(
+    legend.position = c(0.85, 0.75),
+    legend.background = element_rect(fill = "#ffffffee")
+  ) +
 
   # Renomer tout
   labs(
@@ -277,8 +323,6 @@ drea_torg_isle_diff <- sum(penguins$island == "Dream") - sum(penguins$island == 
 L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dream, qui en comporte `{r} drea_torg_isle_diff` de plus que l'île Torgersen. L'île Biscoe a donc une bonne avance sur les autres en terme de population de pingouins, toutefois ce pourrait aussi être que les autres îles n'ont pas eus autant de couvrage par l'équipe d'échantillonnage.
 
 La @fig-freq-isle suggère également que les \adelie{}s sont la seule des trois espèces à se situer sur plus d'une des îles mesurées. Il se pourrait plusieurs raisons pour ceci, par exemple une préférence nomade, mais sans des recherches plus approfondies c'est entièrement incertain. Il est à noter qu'à l'exception de l'île Torgersen, les \adelie{}s forment la minoritée et ne sont donc l'espèce pinguinale primaire que sur une des trois îles.
-
-### Quelle est la relation entre les espèces et l’île?
 
 ### Quelles sont les relations entre le sexe, l’espèce et l’île?
 
@@ -354,6 +398,9 @@ ggplot(sifted) +
   # Anotation de l'écart type
   geom_text(data=dfTab,aes(x=species, group=sex, y=y, parse=FALSE, label=sprintf("s = %.2f", dfTab$sd)), position=position_dodge(width=dodgewidth), vjust=0) +
 
+  # Thèmes
+  theme(legend.position = c(0.15, 0.85)) +
+
   # Anotations
   scale_colour_discrete(labels = c("Femelle", "Mâle")) +
   labs(
@@ -385,18 +432,14 @@ sifted <-
 dfTab <-
   sifted %>%
   group_by(species) %>%
-  select(
-    species,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm
-  ) %>%
   summarize(
     x = min((penguins %>% filter(!is.na(bill_length_mm)))$bill_length_mm) + ifelse(species == "Adelie", 0, ifelse(species == "Chinstrap", 10, 20)),
     y = max(bill_depth_mm) + 0.1,
     r = cor(bill_length_mm, bill_depth_mm),
     r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared
-  )
+  ) %>%
+  arrange(species) %>%
+  filter(row_number()==1)
 
 ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
   geom_point(aes(size = flipper_length_mm, colour = species), alpha = 0.2) +
@@ -436,29 +479,29 @@ dfTab <-
   group_by(
     species
   ) %>%
-  select(
-    species,
-    bill_length_mm,
-    bill_depth_mm,
-    flipper_length_mm
-  ) %>%
   summarize(
     x = min((penguins %>% filter(!is.na(bill_length_mm)))$bill_length_mm) + ifelse(species == "Adelie", 0, ifelse(species == "Chinstrap", 10, 20)),
     y = max(bill_depth_mm) + 0.1,
     r = cor(bill_length_mm, bill_depth_mm),
     r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared
-  )
+  ) %>%
+  arrange(species) %>%
+  filter(row_number()==1)
+
+dfTab
 
 ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
   geom_point(aes(colour = species), alpha = 0.2) +
 
   geom_smooth(method="lm",aes(color=species),se=TRUE, fill="grey80") +
 
-  geom_text(data=dfTab,aes(color=species, label=sprintf("R^2 == %.2f", r2), x=x, y=24),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
-  geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x, y=23),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+  geom_text(data=dfTab,aes(color=species, label=species, x=x, y=24),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+  geom_text(data=dfTab,aes(color=species, label=sprintf("R^2 == %.2f", r2), x=x, y=23.4),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+  geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x, y=22.4),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
 
   # Thèmes
   penguin_colour_scale() +
+  theme(legend.position = "none") +
 
   # Renomer tout
   labs(
@@ -472,6 +515,68 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
 
 ### Est-ce qu’il y a des tendances temporelles?
 
+3 années comme étendu temporelle, ayant des séparations discrètes par année, ne me permet pas de tirer des conclusions valides correliant l'année à une autre variable. Il y aura une trop forte incertitude dans tous cas, et l'interpolation ainsi que l'extrapolation ne serviront pas.
+
+```{r fig-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
+
+# TODO: Delete
+
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(year) &
+    !is.na(body_mass_g)
+  ) %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000
+  )
+
+dfTab <-
+  sifted %>%
+  group_by(
+    species
+  ) %>%
+  select(
+    species,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm
+  ) %>%
+  summarize(
+    x = min((penguins %>% filter(!is.na(bill_length_mm)))$bill_length_mm) + ifelse(species == "Adelie", 0, ifelse(species == "Chinstrap", 10, 20)),
+    y = max(bill_depth_mm) + 0.1,
+    r = cor(bill_length_mm, bill_depth_mm),
+    r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared
+  )
+
+ggplot(sifted, aes(year, bill_depth_mm)) +
+  # geom_line(stat="count", aes(colour = species)) +
+  geom_point(aes(colour = species)) +
+
+  geom_smooth(method="lm",aes(color=species),se=TRUE, fill="grey80") +
+
+  expand_limits(y=0) +
+
+  # Intervales
+  scale_x_continuous(
+    breaks = seq(from = 2007, to = 2009, by = 1)
+  ) +
+
+
+  # Thèmes
+  theme(
+    panel.grid.major.y = element_line(color = "grey90"),
+  ) +
+  penguin_colour_scale() +
+
+  # Renomer tout
+  labs(
+    title = "Population par espèce, selon le temps",
+    x = "Année",
+    y = "Taille de la population",
+    colour = "Espèce"
+  )
+```
 
 {{< pagebreak >}}
 
