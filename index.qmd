@@ -19,21 +19,6 @@ notebook-links: false
 ---
 
 ```{r}
-# Assurer l'utilisation des virgules par les sorties
-
-knit_print.numeric = function(x, ...) {
-  prettyNum(x, decimal.mark=",")
-}
-
-registerS3method(
-  "knit_print", "numeric", knit_print.numeric,
-  envir = asNamespace("knitr")
-)
-```
-
-`{r} 1234.567`
-
-```{r}
 # Préparatipn de librairies et installations variés
 
 # install.packages("palmerpenguins")
@@ -46,11 +31,57 @@ library(palmerpenguins)
 library("tidyverse")
 library(ggbeeswarm) # Génère des graphique d'essaim d'abeille
 library(viridis) # Couleurs pouvant être mieux perçus
+library(knitr) # Tableaux
 
 # citation()
 # citation("palmerpenguins")
 # citation("tidyverse")
 # citation("ggbeeswarm")
+```
+
+```{r}
+# Assurer l'utilisation des virgules par les sorties
+
+inline_hook_old <- knit_hooks$get("inline")
+
+format_d <- function(x) {
+  if (is.numeric(x)) {
+    return(str_replace_all(str_replace_all(sprintf("%.2f", x), "[.]", ","), ",00", ""))
+  }
+
+  return(x)
+}
+
+kable_fr <- function(x) {
+  # Alignement selon la type de valeur
+  alignment <- ""
+  for(i in 1:ncol(x)) {
+    if (is.numeric(x[,i])) {
+      alignment <- paste(alignment, "r", sep="")
+    } else {
+      alignment <- paste(alignment, "l", sep="")
+    }
+  }
+
+  x %>%
+    mutate_all(~format_d(.)) %>%
+    kable(align=alignment)
+}
+
+decimal_hook <- function (x) {
+  if (is.numeric(x)) {
+    # If integer, print without decimal; otherwise print two places
+    res <- ifelse(x == round(x),
+      sprintf("%d", x),
+      str_replace_all(sprintf("%.2f", x), "[.]", ",")
+    )
+    paste(res, collapse = ", ")
+  }
+
+  inline_hook_old(x)
+}
+
+knit_hooks$set(inline = decimal_hook)
 ```
 
 ```{r}
@@ -72,6 +103,26 @@ penguin_colour_scale <- function(fill = FALSE) {
 # Utilisation d'une graine aléatoire déterminée
 set.seed(3142)
 
+```
+
+```{r}
+# Fonctions générales
+
+# Mode pour les facteurs
+Mode <- function(x) {
+  ux <- unique(x)
+  return(ux[which.max(tabulate(match(x, ux)))])
+}
+```
+
+```{r}
+penguins_fr <-
+  penguins %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000
+  )
+
+colnames(penguins_fr) <- c("Espèce", "Isle", "Longueur du bec (mm)", "Profondeur du bec (mm)", "Longueure de la nageoire (mm)", "Masse corporelle (kg)", "Sexe", "Année")
 ```
 
 MDM4U-01
@@ -122,13 +173,106 @@ Une variable numérique *discrète, donnée à l'unité près, indiquant l'anné
 
 ### Est-ce qu’il y a des valeurs manquantes?
 
+```{r}
+
+penguins %>%
+  filter(
+    is.na(species) |
+    is.na(island) |
+    is.na(bill_length_mm) |
+    is.na(bill_depth_mm) |
+    is.na(flipper_length_mm) |
+    is.na(body_mass_g) |
+    is.na(sex) |
+    is.na(year)
+  ) %>%
+  kable_fr()
+
+```
+
 ### Est-ce qu’il y a des valeurs aberrantes?
 
 ### Quelle est le sommaire statistique de chaque variable?
 
 o Qualitative : Fréquence, NA, mode.
 
+```{r}
+
+# rownames(sommaire) <- colnames(penguins)
+
+Mode(penguins$island)
+
+factor_list <-
+  penguins_fr %>%
+  select_if(negate(is.numeric)) %>%
+  summarise_all(
+    list(
+      n=~n(),
+      na=~sum(is.na(.)),
+      mode=~(.)[1]
+    )
+  ) %>%
+  unlist() %>%
+  split(seq(ncol(
+    penguins_fr %>%
+    select_if(negate(is.numeric))
+  )))
+
+factor_df <- data.frame(
+  matrix(unlist(factor_list), nrow=3, byrow=TRUE),
+  row.names = colnames(
+    penguins_fr %>%
+    select_if(negate(is.numeric))
+  )
+)
+
+colnames(factor_df) <- c("n", "NA", "Mode")
+
+factor_df# %>%
+  # kable()
+
+```
+
 o Quantitative :
+
+```{r}
+
+# rownames(sommaire) <- colnames(penguins)
+
+numeric_list <-
+  penguins_fr %>%
+  select_if(is.numeric) %>%
+  summarise_all(
+    list(
+      moyenne=~mean(., na.rm = TRUE),
+      min=~min(., na.rm = TRUE),
+      q1=~quantile(., 0.25, na.rm = TRUE),
+      q2=~median(., na.rm = TRUE),
+      q3=~quantile(., 0.75, na.rm = TRUE),
+      max=~max(., na.rm = TRUE),
+      ecart=~max(., na.rm = TRUE) - min(., na.rm = TRUE)
+    )
+  ) %>%
+  unlist() %>%
+  split(seq(ncol(
+    penguins_fr %>%
+    select_if(is.numeric)
+  )))
+
+numeric_df <- data.frame(
+  matrix(unlist(numeric_list), nrow=5, byrow=TRUE),
+  row.names = colnames(
+    penguins_fr %>%
+    select_if(is.numeric)
+  )
+)
+
+colnames(numeric_df) <- c("Moyenne", "Min", "Q1", "Médiane", "Q3", "Max", "Écart")
+
+numeric_df %>%
+  kable_fr()
+
+```
 
 ### Min, moyenne, médiane, mode, max, quartiles, écart type.
 
@@ -413,54 +557,9 @@ ggplot(sifted) +
 
 Les \adelie{}s et \chinstrap{}s sont ensuite similaires en terme de masse. Les \gentoo{}s, quants à eux, pèsent considérablement plus à `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Adelie",]$mean, 2)` fois la masse des \adelie{}s et `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Chinstrap",]$mean, 2)` fois la masse des \chinstrap{}s.
 
-### Quelle est la relation entre les dimensions du bec et la dimension de la nageoire?
+### Quelle est la relation entre les dimensions du bec?
 
-En comparant 
-
-```{r fig-dots-becnage, echo=FALSE, fig.cap='La longueure de la nageoire pour la profondeur du bec, la longuer du bec et l\'espèce', out.width='100%', fig.align='center'}
-
-sifted <-
-  penguins %>%
-  mutate(
-    flipper_length_mm = flipper_length_mm / 10
-  ) %>%
-  filter(
-    !is.na(flipper_length_mm) &
-    !is.na(sex)
-  )
-
-dfTab <-
-  sifted %>%
-  group_by(species) %>%
-  summarize(
-    x = min((penguins %>% filter(!is.na(bill_length_mm)))$bill_length_mm) + ifelse(species == "Adelie", 0, ifelse(species == "Chinstrap", 10, 20)),
-    y = max(bill_depth_mm) + 0.1,
-    r = cor(bill_length_mm, bill_depth_mm),
-    r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared
-  ) %>%
-  arrange(species) %>%
-  filter(row_number()==1)
-
-ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
-  geom_point(aes(size = flipper_length_mm, colour = species), alpha = 0.2) +
-
-  geom_smooth(method="lm",aes(color=species),se=TRUE, fill="grey80") +
-
-  geom_text(data=dfTab,aes(color=species, label=sprintf("R^2 == %.2f", r2), x=x, y=24),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
-  geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x, y=23),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
-
-  # Thèmes
-  penguin_colour_scale() +
-
-  # Renomer tout
-  labs(
-    title = "Longueure de la nageoire pour la profondeur\net longuer du bec et l'espèce",
-    x = "Longueur du bec (mm)",
-    y = "Profondeur du bec (mm)",
-    colour = "Espèce",
-    size = "Longueure de la\nnageoire (cm)"
-  )
-```
+En comparant
 
 ```{r fig-dots-longbecnage, echo=FALSE, fig.cap='La longueure de la nageoire pour la profondeur du bec, la longuer du bec et l\'espèce', out.width='100%', fig.align='center'}
 
@@ -488,8 +587,6 @@ dfTab <-
   arrange(species) %>%
   filter(row_number()==1)
 
-dfTab
-
 ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
   geom_point(aes(colour = species), alpha = 0.2) +
 
@@ -515,11 +612,11 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
 
 ### Est-ce qu’il y a des tendances temporelles?
 
+En plaçant chacune des variables numériques et des calculées en fonction du temps, telles que dans la @fig-mass-overtime, la @fig-nage-overtime, et la @fig-pop-overtime, il n'y a remarquablement peu de corrélation évidente.
+
 3 années comme étendu temporelle, ayant des séparations discrètes par année, ne me permet pas de tirer des conclusions valides correliant l'année à une autre variable. Il y aura une trop forte incertitude dans tous cas, et l'interpolation ainsi que l'extrapolation ne serviront pas.
 
-```{r fig-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
-
-# TODO: Delete
+```{r fig-mass-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
 
 sifted <-
   penguins %>%
@@ -528,7 +625,119 @@ sifted <-
     !is.na(body_mass_g)
   ) %>%
   mutate(
-    body_mass_g = body_mass_g / 1000
+    body_mass_g = body_mass_g / 1000,
+    flipper_length_mm = flipper_length_mm / 10
+  )
+
+dfTab <-
+  sifted %>%
+  group_by(
+    species,
+    year
+  ) %>%
+  select(
+    year,
+    species,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm,
+    body_mass_g
+  ) %>%
+  summarize(
+    mean = mean(body_mass_g)
+  ) %>%
+  distinct(species, year, .keep_all=TRUE)
+
+ggplot(sifted, aes(year, body_mass_g)) +
+  geom_line(data=dfTab, aes(x=year, colour = species, y=mean)) +
+  geom_point(aes(colour = species), alpha=0.2) +
+
+  # Intervales
+  scale_x_continuous(
+    breaks = seq(from = 2007, to = 2009, by = 1)
+  ) +
+
+
+  # Thèmes
+  theme(
+    panel.grid.major.y = element_line(color = "grey90"),
+  ) +
+  penguin_colour_scale() +
+
+  # Renomer tout
+  labs(
+    title = "Masse corporelle par espèce, selon le temps",
+    x = "Année",
+    y = "Masse corporelle (kg)",
+    colour = "Espèce"
+  )
+```
+
+```{r fig-nage-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
+
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(year) &
+    !is.na(flipper_length_mm)
+  ) %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000,
+    flipper_length_mm = flipper_length_mm / 10
+  )
+
+dfTab <-
+  sifted %>%
+  group_by(
+    species,
+    year
+  ) %>%
+  select(
+    year,
+    species,
+    bill_length_mm,
+    bill_depth_mm,
+    flipper_length_mm
+  ) %>%
+  summarize(
+    mean = mean(flipper_length_mm)
+  ) %>%
+  distinct(species, year, .keep_all=TRUE)
+
+ggplot(sifted, aes(year, flipper_length_mm)) +
+  geom_line(data=dfTab, aes(x=year, colour = species, y=mean)) +
+  geom_point(aes(colour = species), alpha=0.2) +
+
+  # Intervales
+  scale_x_continuous(
+    breaks = seq(from = 2007, to = 2009, by = 1)
+  ) +
+
+
+  # Thèmes
+  theme(
+    panel.grid.major.y = element_line(color = "grey90"),
+  ) +
+  penguin_colour_scale() +
+
+  # Renomer tout
+  labs(
+    title = "Longueure de la nageoire par espèce, selon le temps",
+    x = "Année",
+    y = "Longueure de la nageoire (cm)",
+    colour = "Espèce"
+  )
+```
+
+```{r fig-pop-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
+
+# TODO: Delete
+
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(year) &
+    !is.na(body_mass_g)
   )
 
 dfTab <-
@@ -549,11 +758,10 @@ dfTab <-
     r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared
   )
 
-ggplot(sifted, aes(year, bill_depth_mm)) +
-  # geom_line(stat="count", aes(colour = species)) +
-  geom_point(aes(colour = species)) +
+ggplot(sifted, aes(year)) +
+  geom_line(stat="count", aes(colour = species)) +
 
-  geom_smooth(method="lm",aes(color=species),se=TRUE, fill="grey80") +
+  # geom_smooth(data=dfTab,method="lm",aes(color=species, y=sum),se=TRUE, fill="grey80") +
 
   expand_limits(y=0) +
 
