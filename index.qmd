@@ -119,7 +119,8 @@ Mode <- function(x) {
 penguins_fr <-
   penguins %>%
   mutate(
-    body_mass_g = body_mass_g / 1000
+    body_mass_g = body_mass_g / 1000,
+    sex = ifelse(sex == "male", "Mâle", ifelse(sex == "female", "Femelle", sex))
   )
 
 colnames(penguins_fr) <- c("Espèce", "Isle", "Longueur du bec (mm)", "Profondeur du bec (mm)", "Longueure de la nageoire (mm)", "Masse corporelle (kg)", "Sexe", "Année")
@@ -192,50 +193,52 @@ penguins %>%
 
 ### Est-ce qu’il y a des valeurs aberrantes?
 
-### Quelle est le sommaire statistique de chaque variable?
-
-o Qualitative : Fréquence, NA, mode.
+### Sommaire statistiques?
 
 ```{r}
-
-# rownames(sommaire) <- colnames(penguins)
-
-Mode(penguins$island)
+#| label: tab-som-qualquant
+#| exho: FALSE
+#| tbl-cap: 'Le sommaire partiel des variables qualitatives et \textit{quantitatives}.'
+#| out-width: '100%'
+#| tbl-align: 'center'
 
 factor_list <-
   penguins_fr %>%
-  select_if(negate(is.numeric)) %>%
+  # select_if(negate(is.numeric)) %>%
   summarise_all(
     list(
       n=~n(),
       na=~sum(is.na(.)),
-      mode=~(.)[1]
+      mode=~as.character(Mode(.))
     )
   ) %>%
   unlist() %>%
   split(seq(ncol(
-    penguins_fr %>%
-    select_if(negate(is.numeric))
+    penguins_fr
+    # select_if(negate(is.numeric))
   )))
 
 factor_df <- data.frame(
-  matrix(unlist(factor_list), nrow=3, byrow=TRUE),
+  matrix(unlist(factor_list), nrow=ncol(penguins_fr), byrow=TRUE),
   row.names = colnames(
-    penguins_fr %>%
-    select_if(negate(is.numeric))
+    penguins_fr
+    # select_if(negate(is.numeric))
   )
 )
 
 colnames(factor_df) <- c("n", "NA", "Mode")
 
-factor_df# %>%
-  # kable()
+factor_df %>%
+  kable()
 
 ```
 
-o Quantitative :
-
 ```{r}
+#| label: tab-som-quant
+#| exho: FALSE
+#| tbl-cap: 'Le sommaire des variables quantitatives.'
+#| out-width: '100%'
+#| tbl-align: 'center'
 
 # rownames(sommaire) <- colnames(penguins)
 
