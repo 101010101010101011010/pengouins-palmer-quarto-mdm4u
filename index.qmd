@@ -174,9 +174,16 @@ Une variable numérique *discrète, donnée à l'unité près, indiquant l'anné
 
 ## Analyse
 
-### Est-ce qu’il y a des valeurs manquantes?
+### Est-ce qu'il y a des valeurs manquantes?
+
+En plaçant chaque pingouin manquant une ou plusieurs mesures dans un même tableau, comme dans le [Tableau @tbl-nalist], plusieurs patrons se mettent en évidence.
 
 ```{r}
+#| label: tbl-nalist
+#| exho: FALSE
+#| tbl-cap: 'Tous les pingouins, en rangées, ayant au moins une valeur manquante.'
+#| out-width: '100%'
+#| tbl-align: 'center'
 
 penguins %>%
   filter(
@@ -195,12 +202,21 @@ penguins %>%
 
 ```
 
-### Est-ce qu’il y a des valeurs aberrantes?
+D'abords, aucune des variables de l'espèce, l'île ou l'année ne manque d'entrée. Ceci est probablement, mais pas certainement, en raison de la méthode d'échentillonnage situant les chercheurs déjà sur l'île et où de la connaissance naturelle de la date courante lors de la requête. Ce seraient donc des métadonnées sans récolte necéssaire sur-place, plutôt prévisionnaire (à part l'espèce, qui peut être distinguée visuellement).
+
+Ensuite, lorsqu'une des mesures quantitatives continues (non incluant l'année) est absente, elles les sont toutes. Dans une situation de récolte de données, il se pourrait peut-être qu'un chercheur voie un pingouin mais ne puisse pas l'atteindre, ce le prévenant d'accomplir une mesure. Le manque de sexe lors de ces cas appuie cette supposition puisque le sexe des pingouins ne peut également pas être mesurée de distance.
+
+Prenant suite, il y a plusieurs pingouins sans sexe assigné. Plusieurs raisons pourraient expliquer ceci: un sexe indéfini ou imprécie, un pingouin échappé (tel que décrit plus haut), ou une raison situationnelle imprévisible. En tout cas, comme évident dans les [Tableaux @tbl-som-qualquant] et [-@tbl-nalist], la majorité des valeurs manquantes sont compris dans la variable du sexe, soit `{r} sum(is.na(penguins$sex)) / sum(is.na(penguins))` de tous les valeurs manquantes. Également, tous les pingouins manquant des données ont notamment un sexe manquant, indiquant que le sexe pourrait être la variable la plus difficile à mesurer ou classifier pour les pingouins Palmer.
+
+Il est également à noter que chaque année d'échantillonage comprend au minimum une valeur manquante et que la première année comprend le plus de valeurs nulles. Plusieurs renseignements au sujet de la situation des chercheurs — tels que la présence d'une erreure systématique provoquant des données nulles ou un manque de préparation lors de la première année — pourraient être déduits, toutefois cela me paraîtrait une extrapolation étant donné le peu d'étendu de temps et le peu de contexte.
+
+
+### Est-ce qu'il y a des valeurs aberrantes?
 
 ### Sommaire statistiques?
 
 ```{r}
-#| label: tab-som-qualquant
+#| label: tbl-som-qualquant
 #| exho: FALSE
 #| tbl-cap: 'Le sommaire partiel des variables qualitatives et \textit{quantitatives}.'
 #| out-width: '100%'
@@ -425,7 +441,7 @@ ggplot(sifted) +
   )
 ```
 
-### Quelle île héberge le plus de pingouins, et quels et la relation entre les espèces et l’île?
+### Quelle île héberge le plus de pingouins, et quels et la relation entre les espèces et l'île?
 
 L'île hébergeant le plus de pinguoins peut être estimée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
 
@@ -475,9 +491,9 @@ L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dre
 
 La @fig-freq-isle suggère également que les \adelie{}s sont la seule des trois espèces à se situer sur plus d'une des îles mesurées. Il se pourrait plusieurs raisons pour ceci, par exemple une préférence nomade, mais sans des recherches plus approfondies c'est entièrement incertain. Il est à noter qu'à l'exception de l'île Torgersen, les \adelie{}s forment la minoritée et ne sont donc l'espèce pinguinale primaire que sur une des trois îles.
 
-### Quelles sont les relations entre le sexe, l’espèce et l’île?
+### Quelles sont les relations entre le sexe, l'espèce et l'île?
 
-### Quelle est la relation entre le sexe et la masse, et l’espèce et la masse?
+### Quelle est la relation entre le sexe et la masse, et l'espèce et la masse?
 
 ```{r}
 # Moyennes des masses de chaque espèce, à utiliser en-texte
@@ -617,7 +633,7 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
   )
 ```
 
-### Est-ce qu’il y a des tendances temporelles?
+### Est-ce qu'il y a des tendances temporelles?
 
 En plaçant chacune des variables numériques et des calculées en fonction du temps, telles que dans la @fig-mass-overtime, la @fig-nage-overtime, et la @fig-pop-overtime, il n'y a remarquablement peu de corrélation évidente.
 
