@@ -26,12 +26,14 @@ notebook-links: false
 # install.packages("languageserver")
 # install.packages("ggbeeswarm")
 # install.packages("viridis")
+# install.packages("kableExtra")
 
 library(palmerpenguins)
 library("tidyverse")
 library(ggbeeswarm) # Génère des graphique d'essaim d'abeille
 library(viridis) # Couleurs pouvant être mieux perçus
 library(knitr) # Tableaux
+library(kableExtra)
 
 # citation()
 # citation("palmerpenguins")
@@ -65,7 +67,7 @@ kable_fr <- function(x) {
 
   x %>%
     mutate_all(~format_d(.)) %>%
-    kable(align=alignment)
+    kable(align=alignment, "pipe")
 }
 
 decimal_hook <- function (x) {
@@ -187,7 +189,9 @@ penguins %>%
     is.na(sex) |
     is.na(year)
   ) %>%
-  kable_fr()
+  `colnames<-`(gsub(" ", " ", colnames(penguins_fr))) %>%
+  kable_fr() %>%
+  column_spec(3:6, width = "4.5em")
 
 ```
 
