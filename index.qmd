@@ -12,33 +12,50 @@ highlight-style: github
 authors:
   - name: Nicolas Kmita
     affiliation: École secondaire Franco-Cité
-bibliography: references.bib
+bibliography:
+  - references.bib
+  - packages.bib
 nocite: |
   @*
 notebook-links: false
 ---
 
 ```{r}
-# Préparatipn de librairies et installations variés
+# Préparation de librairies et installations variés
 
-# install.packages("palmerpenguins")
-# install.packages("tidyverse")
-# install.packages("languageserver")
-# install.packages("ggbeeswarm")
-# install.packages("viridis")
-# install.packages("kableExtra")
+cran_mirror <- "https://mirror.csclub.uwaterloo.ca/CRAN/"
 
-library(palmerpenguins)
-library("tidyverse")
-library(ggbeeswarm) # Génère des graphique d'essaim d'abeille
-library(viridis) # Couleurs pouvant être mieux perçus
-library(knitr) # Tableaux
-library(kableExtra)
+pkgs <- c(
+  "palmerpenguins",
+  "tidyverse",
+  "languageserver",
+  "ggbeeswarm", # Génère des graphique d'essaim d'abeille
+  "viridis", # Couleurs pouvant être mieux perçus
+  "kableExtra",
+  "rmarkdown",
+  "knitr", # Tableaux
+  "tinytex"
+)
 
-# citation()
-# citation("palmerpenguins")
-# citation("tidyverse")
-# citation("ggbeeswarm")
+# Charger les « packages » et, s'ils ne sont pas installés, les installer du mirroir de CRAN indiqué ci-haut (UWaterloo par défaut).
+for(pkg in pkgs) {
+  # Voir https://stackoverflow.com/questions/4090169/elegant-way-to-check-for-missing-packages-and-install-them
+
+  if(require(pkg, character.only=TRUE)){
+    next
+  }
+
+  install.packages(pkg, repos=cran_mirror)
+  library(pkg, character.only=TRUE)
+}
+
+# Assurer la présence de TinyTeX
+if (nchar(tinytex_root()) <= 0) {
+  install_tinytex()
+}
+
+# Génération de citations
+knitr::write_bib(pkgs, prefix="", file="packages.bib", tweak=FALSE)
 ```
 
 ```{r}
