@@ -159,7 +159,7 @@ Il y a 8 variables dont les données ont été récoltés par la station Palmer:
 
 ### Espèce --- `species`
 
-Une variable catégorique nominale dénotant nom de l'espèce du pingouin mesuré, soit \adelie{}, \chinstrap{} ou \gentoo{}.
+Une variable catégorique nominale dénotant le nom de l'espèce du pingouin mesuré, soit \adelie{}, \chinstrap{} ou \gentoo{}.
 
 ### Isle --- `island`
 
