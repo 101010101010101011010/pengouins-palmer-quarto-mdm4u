@@ -153,7 +153,7 @@ M. Chabot
 
 {{< pagebreak >}}
 
-## Variables
+## X- Variables
 
 Il y a 8 variables dont les données ont été récoltés par la station Palmer:
 
@@ -195,7 +195,7 @@ Une variable numérique *discrète, donnée à l'unité près, indiquant l'anné
 Les valeurs manquantes ne sont enlevés que lorsqu'elles interfèrent directement avec les calculs. Par exemple, la moyenne de 1 + NA n'est pas une valeur valide. Ainsi, dans un graphique contenant deux variables, les entrées ayant des valeurs manquantes dans au moins une *des deux variables* seront exlus.
 :::
 
-### Est-ce qu'il y a des valeurs manquantes?
+### X- Est-ce qu'il y a des valeurs manquantes?
 
 En plaçant chaque pingouin manquant une ou plusieurs mesures dans un même tableau, comme dans le [Tableau @tbl-nalist], plusieurs patrons se mettent en évidence.
 
@@ -229,7 +229,7 @@ Ensuite, lorsqu'une des mesures quantitatives continues (non incluant l'année) 
 
 Prenant suite, il y a plusieurs pingouins sans sexe assigné. Plusieurs raisons pourraient expliquer ceci: un sexe indéfini ou imprécie, un pingouin échappé (tel que décrit plus haut), ou une raison situationnelle imprévisible. En tout cas, comme évident dans les [Tableaux @tbl-som-qualquant] et [-@tbl-nalist], la majorité des valeurs manquantes sont compris dans la variable du sexe, soit `{r} sum(is.na(penguins$sex)) / sum(is.na(penguins))` de tous les valeurs manquantes. Également, tous les pingouins manquant des données ont notamment un sexe manquant, indiquant que le sexe pourrait être la variable la plus difficile à mesurer ou classifier pour les pingouins Palmer.
 
-Il est également à noter que chaque année d'échantillonage comprend au minimum une valeur manquante et que la première année comprend le plus de valeurs nulles. Plusieurs renseignements au sujet de la situation des chercheurs — tels que la présence d'une erreure systématique provoquant des données nulles ou un manque de préparation lors de la première année — pourraient être déduits, toutefois cela me paraîtrait une extrapolation étant donné le peu d'étendu de temps et le peu de contexte.
+Il est également à noter que chaque année d'échantillonage comprend au minimum une valeur manquante et que la première année en comprend le plus. Plusieurs renseignements au sujet de la situation des chercheurs — tels que la présence d'une erreure systématique provoquant des données invalides (NA) ou un manque de préparation lors de la première année — pourraient être déduits, toutefois cela me paraîtrait une extrapolation étant donné le peu d'étendu de temps et le peu de contexte.
 
 ### Est-ce qu'il y a des valeurs aberrantes?
 
@@ -461,7 +461,7 @@ ggplot(sifted) +
   )
 ```
 
-### Quelle île héberge le plus de pingouins, et quels et la relation entre les espèces et l'île?
+### X- Quelle île héberge le plus de pingouins, et quels et la relation entre les espèces et l'île?
 
 L'île hébergeant le plus de pinguoins peut être estimée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
 
@@ -513,7 +513,7 @@ La @fig-freq-isle suggère également que les \adelie{}s sont la seule des trois
 
 ### Quelles sont les relations entre le sexe, l'espèce et l'île?
 
-### Quelle est la relation entre le sexe et la masse, et l'espèce et la masse?
+### X- Quelle est la relation entre le sexe et la masse, et l'espèce et la masse?
 
 ```{r}
 # Moyennes des masses de chaque espèce, à utiliser en-texte
@@ -542,7 +542,7 @@ penguin_mass_avgs <-
   )
 ```
 
-En omettant les valeurs lorsque le sexe ou le poids sont nulles, il est d'abord évident, dans la @fig-violin-masscats, que les mâles sont, en moyenne, plus pesants que les femelles. Ceci est le cas pour les trois espèces analysés.
+En omettant les valeurs lorsque le sexe ou le poids sont manquantes, il est d'abord évident, dans la @fig-violin-masscats, que les mâles sont, en moyenne, plus pesants que les femelles. Ceci est le cas pour les trois espèces analysés.
 
 ```{r fig-violin-masscats, exho=FALSE, fig.cap='Les masses corporelles, en kilogrammes, par rapport à l\'espèce et le sexe des pingouins Palmer', out.width='100%', fig.align='center'}
 
@@ -598,7 +598,9 @@ ggplot(sifted) +
   )
 ```
 
-Les \adelie{}s et \chinstrap{}s sont ensuite similaires en terme de masse. Les \gentoo{}s, quants à eux, pèsent considérablement plus à `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Adelie",]$mean, 2)` fois la masse des \adelie{}s et `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Chinstrap",]$mean, 2)` fois la masse des \chinstrap{}s.
+Les \adelie{}s et \chinstrap{}s sont ensuite similaires en terme de masse. Les \gentoo{}s, quants à eux, pèsent considérablement plus à `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Adelie",]$mean, 2)` fois la masse des \adelie{}s et `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Chinstrap",]$mean, 2)` fois la masse des \chinstrap{}s. Les \gentoo{}s sont donc, en moyenne, les pingouins les plus pesants de Palmer^[Supposant que les espèces \adelie{}, \chinstrap{} et \gentoo{} sont les seules espèces de l'archipel Palmer.]
+
+Il se trouve également que les écarts types des mâles sont tous plus hautes que ceux des femelles; les mâles se trouvent dans les basses à moyennes trentaines tandis que les femelles se trouvent dans les hautes vingtaines. Il y a ainsi une plus grande variation de masse pour les mâles de chaque espèce. Notez, toutefois, que cette tendence pourrait être le résultat d'un échantillon de taille minime. Les divisions ayant peu d'échantillonnés contiennent des points seuls aux extrémités (pas necéssairement des points abbérants) de manière similaire aux points normaux de divisions ayant des échantillons plus complets. Sur cette idée, les divisions ayant le plus grand écart type de leur sexe proviennent des \chinstrap{}s, qui ont le moins de pingouins échantillonnés. Il se pourrait donc que le sexe soit corrélé à une plus grande variation de masse, mais les variations de tailles d'échantillon de chaque division me prévient de faire une telle assumption.
 
 ### Quelle est la relation entre les dimensions du bec?
 
