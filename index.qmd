@@ -461,7 +461,7 @@ ggplot(sifted) +
   )
 ```
 
-### X- Quelle île héberge le plus de pingouins, et quels et la relation entre les espèces et l'île?
+### X- Quelle île héberge le plus de pingouins, et quel et la relation entre les espèces et l'île?
 
 L'île hébergeant le plus de pinguoins peut être estimée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
 
