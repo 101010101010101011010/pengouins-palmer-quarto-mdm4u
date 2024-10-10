@@ -191,6 +191,10 @@ Une variable numérique *discrète, donnée à l'unité près, indiquant l'anné
 
 ## Analyse
 
+::: {.callout-note}
+Les valeurs manquantes ne sont enlevés que lorsqu'elles interfèrent directement avec les calculs. Par exemple, la moyenne de 1 + NA n'est pas une valeur valide. Ainsi, dans un graphique contenant deux variables, les entrées ayant des valeurs manquantes dans au moins une *des deux variables* seront exlus.
+:::
+
 ### Est-ce qu'il y a des valeurs manquantes?
 
 En plaçant chaque pingouin manquant une ou plusieurs mesures dans un même tableau, comme dans le [Tableau @tbl-nalist], plusieurs patrons se mettent en évidence.
@@ -226,7 +230,6 @@ Ensuite, lorsqu'une des mesures quantitatives continues (non incluant l'année) 
 Prenant suite, il y a plusieurs pingouins sans sexe assigné. Plusieurs raisons pourraient expliquer ceci: un sexe indéfini ou imprécie, un pingouin échappé (tel que décrit plus haut), ou une raison situationnelle imprévisible. En tout cas, comme évident dans les [Tableaux @tbl-som-qualquant] et [-@tbl-nalist], la majorité des valeurs manquantes sont compris dans la variable du sexe, soit `{r} sum(is.na(penguins$sex)) / sum(is.na(penguins))` de tous les valeurs manquantes. Également, tous les pingouins manquant des données ont notamment un sexe manquant, indiquant que le sexe pourrait être la variable la plus difficile à mesurer ou classifier pour les pingouins Palmer.
 
 Il est également à noter que chaque année d'échantillonage comprend au minimum une valeur manquante et que la première année comprend le plus de valeurs nulles. Plusieurs renseignements au sujet de la situation des chercheurs — tels que la présence d'une erreure systématique provoquant des données nulles ou un manque de préparation lors de la première année — pourraient être déduits, toutefois cela me paraîtrait une extrapolation étant donné le peu d'étendu de temps et le peu de contexte.
-
 
 ### Est-ce qu'il y a des valeurs aberrantes?
 
