@@ -238,7 +238,7 @@ Les valeurs aberrantes sont traités selon l'espèce.
 :::
 
 ::: {.callout-tip}
-Une valeur aberrante est défini en tant qu'une valeur non contenue entre Q1 - 1,5(IIQ) et Q3 + 1,5(IIQ).
+Une valeur est souvant considérée aberrante lorsqu'elle n'est pas contenue entre Q1 - 1,5(IIQ) et Q3 + 1,5(IIQ).
 :::
 
 ```{r}
@@ -272,39 +272,109 @@ penguins %>%
 ```
 
 ```{r}
-#| label: tbl-aberrantes
+#| label: tbl-aberrantes-group-1
 #| exho: FALSE
-#| tbl-cap: 'Les valeurs aberrantes'
+#| tbl-cap: "Les pingouins aberrantes, soit hors des bornes indiquées par le [Tableau @tbl-aberrantes-minmax], en groupant par espèce et par sélectionnant lorsque la variable `Longueur du bec (mm)` abèrre. Les cellules ayant un arrière-plan noir et du texte blanc indiquent une valeur aberrante."
 #| out-width: '100%'
 #| tbl-align: 'center'
 
 penguins %>%
-  # group_by(species) %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000
+  ) %>%
+  group_by(species) %>%
   filter(
     if_any(
       c(bill_length_mm),#, bill_depth_mm, flipper_length_mm, body_mass_g),
-      ~ (. < (quantile(., 0.25, na.rm=TRUE) - sd(., na.rm=TRUE)))
+      ~ (. < (quantile(., 0.25, na.rm=TRUE) - (1.5*sd(., na.rm=TRUE)))) |
+        (. > (quantile(., 0.75, na.rm=TRUE) + (1.5*sd(., na.rm=TRUE))))
     )
   ) %>%
-  # summarise_all(
-  #   list(
-  #     q1 = quantile(., 0.25, na.rm=TRUE)
-  #   )
-  # ) %>%
-  kable() %>%
-  column_spec(3, color="white", background = "black")
+  `colnames<-`(gsub(" ", " ", colnames(penguins_fr))) %>%
+  kable_fr() %>%
+  column_spec(3, color="white", background = "black") %>%
+  column_spec(c(3,4,6), width = "4.5em") %>%
+  column_spec(5, width = "6em")
+```
 
-# penguins %>%
-#   group_by(species) %>%
-#   filter(
-#     bill_length_mm < quantile(bill_length_mm, 0.1, na.rm=TRUE)
-#     # bill_depth_mm |
-#     # flipper_length_mm |
-#     # body_mass_g |
-#   ) %>%
-#   `colnames<-`(gsub(" ", " ", colnames(penguins_fr))) %>%
-#   kable_fr() %>%
-#   column_spec(3:6, width = "4.5em")
+```{r}
+#| label: tbl-aberrantes-group-2
+#| exho: FALSE
+#| tbl-cap: "Les pingouins aberrantes, soit hors des bornes indiquées par le [Tableau @tbl-aberrantes-minmax], en groupant par espèce et par sélectionnant lorsque la variable `Profondeur du bec (mm)` abèrre. Les cellules ayant un arrière-plan noir et du texte blanc indiquent une valeur aberrante."
+#| out-width: '100%'
+#| tbl-align: 'center'
+
+penguins %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000
+  ) %>%
+  group_by(species) %>%
+  filter(
+    if_any(
+      c(bill_depth_mm),#flipper_length_mm, body_mass_g),
+      ~ (. < (quantile(., 0.25, na.rm=TRUE) - (1.5*sd(., na.rm=TRUE)))) |
+        (. > (quantile(., 0.75, na.rm=TRUE) + (1.5*sd(., na.rm=TRUE))))
+    )
+  ) %>%
+  `colnames<-`(gsub(" ", " ", colnames(penguins_fr))) %>%
+  kable_fr() %>%
+  column_spec(4, color="white", background = "black") %>%
+  column_spec(c(3,4,6), width = "4.5em") %>%
+  column_spec(5, width = "6em")
+
+```
+
+```{r}
+#| label: tbl-aberrantes-group-3
+#| exho: FALSE
+#| tbl-cap: "Les pingouins aberrantes, soit hors des bornes indiquées par le [Tableau @tbl-aberrantes-minmax], en groupant par espèce et par sélectionnant lorsque la variable `Longueure de la nageoire (mm)` abèrre. Les cellules ayant un arrière-plan noir et du texte blanc indiquent une valeur aberrante."
+#| out-width: '100%'
+#| tbl-align: 'center'
+
+penguins %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000
+  ) %>%
+  group_by(species) %>%
+  filter(
+    if_any(
+      c(flipper_length_mm),#flipper_length_mm, body_mass_g),
+      ~ (. < (quantile(., 0.25, na.rm=TRUE) - (1.5*sd(., na.rm=TRUE)))) |
+        (. > (quantile(., 0.75, na.rm=TRUE) + (1.5*sd(., na.rm=TRUE))))
+    )
+  ) %>%
+  `colnames<-`(gsub(" ", " ", colnames(penguins_fr))) %>%
+  kable_fr() %>%
+  column_spec(5, color="white", background = "black") %>%
+  column_spec(c(3,4,6), width = "4.5em") %>%
+  column_spec(5, width = "6em")
+
+```
+
+```{r}
+#| label: tbl-aberrantes-group-4
+#| exho: FALSE
+#| tbl-cap: "Les pingouins aberrantes, soit hors des bornes indiquées par le [Tableau @tbl-aberrantes-minmax], en groupant par espèce et par sélectionnant lorsque la variable `Masse corporelle (kg)` abèrre. Les cellules ayant un arrière-plan noir et du texte blanc indiquent une valeur aberrante."
+#| out-width: '100%'
+#| tbl-align: 'center'
+
+penguins %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000
+  ) %>%
+  group_by(species) %>%
+  filter(
+    if_any(
+      c(body_mass_g),#flipper_length_mm, body_mass_g),
+      ~ (. < (quantile(., 0.25, na.rm=TRUE) - (1.5*sd(., na.rm=TRUE)))) |
+        (. > (quantile(., 0.75, na.rm=TRUE) + (1.5*sd(., na.rm=TRUE))))
+    )
+  ) %>%
+  `colnames<-`(gsub(" ", " ", colnames(penguins_fr))) %>%
+  kable_fr() %>%
+  column_spec(6, color="white", background = "black") %>%
+  column_spec(c(3,4,6), width = "4.5em") %>%
+  column_spec(5, width = "6em")
 
 ```
 
