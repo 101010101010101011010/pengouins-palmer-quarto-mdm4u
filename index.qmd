@@ -233,6 +233,149 @@ Il est également à noter que chaque année d'échantillonage comprend au minim
 
 ### Est-ce qu'il y a des valeurs aberrantes?
 
+::: {.callout-note}
+Les valeurs aberrantes sont traités selon l'espèce.
+:::
+
+::: {.callout-tip}
+Une valeur aberrante est défini en tant qu'une valeur non contenue entre Q1 - 1,5(IIQ) et Q3 + 1,5(IIQ).
+:::
+
+<!-- #| label: tbl-sd
+#| exho: FALSE
+#| tbl-cap: 'Les écarts types'
+#| out-width: '100%'
+#| tbl-align: 'center'
+#| layout-ncol: 2
+#| tbl-subcap:
+#|    - "Longueur du bec (mm)"
+#|    - "Profondeur du bec (mm)"
+#|    - "Longueure de la nageoire (mm)"
+#|    - "Masse corporelle (kg)" -->
+::: {#tbl-aberrvars layout-ncol=2}
+
+```{r}
+#| tbl-cap: "Les bords de ce qui n'est pas une longueur du bec (mm) aberrante"
+
+penguins %>%
+  group_by(species) %>%
+  select(bill_length_mm) %>%
+  summarise_all(
+    list(
+      sd = ~sd(., na.rm=TRUE),
+      q1 = ~quantile(., 0.25, na.rm=TRUE),
+      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
+      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
+    )
+  ) %>%
+  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
+  kable_fr() %>%
+  column_spec(2:5, width = "2.1em")
+
+```
+
+``` {r}
+#| tbl-cap: "Profondeur du bec (mm)"
+
+penguins %>%
+  group_by(species) %>%
+  select(bill_depth_mm) %>%
+  summarise_all(
+    list(
+      sd = ~sd(., na.rm=TRUE),
+      q1 = ~quantile(., 0.25, na.rm=TRUE),
+      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
+      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
+    )
+  ) %>%
+  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
+  kable_fr() %>%
+  column_spec(2:5, width = "2.1em")
+
+```
+
+``` {r}
+#| tbl-cap: "Longueure de la nageoire (mm)"
+
+penguins %>%
+  group_by(species) %>%
+  select(flipper_length_mm) %>%
+  summarise_all(
+    list(
+      sd = ~sd(., na.rm=TRUE),
+      q1 = ~quantile(., 0.25, na.rm=TRUE),
+      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
+      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
+    )
+  ) %>%
+  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
+  kable_fr() %>%
+  column_spec(2:5, width = "2.1em")
+
+```
+
+```{r}
+#| tbl-cap: "Masse corporelle (kg)"
+
+penguins %>%
+  mutate(
+    body_mass_g = body_mass_g / 1000,
+  ) %>%
+  group_by(species) %>%
+  select(body_mass_g) %>%
+  summarise_all(
+    list(
+      sd = ~sd(., na.rm=TRUE),
+      q1 = ~quantile(., 0.25, na.rm=TRUE),
+      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
+      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
+    )
+  ) %>%
+  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
+  kable_fr() %>%
+  column_spec(2:5, width = "2.1em")
+
+```
+
+:::
+
+```{r}
+#| label: tbl-aberrantes
+#| exho: FALSE
+#| tbl-cap: 'Les valeurs aberrantes'
+#| out-width: '100%'
+#| tbl-align: 'center'
+
+penguins %>%
+  # group_by(species) %>%
+  filter(
+    if_any(
+      c(bill_length_mm),#, bill_depth_mm, flipper_length_mm, body_mass_g),
+      ~ (. < (quantile(., 0.25, na.rm=TRUE) - sd(., na.rm=TRUE)))
+    )
+  ) %>%
+  # summarise_all(
+  #   list(
+  #     q1 = quantile(., 0.25, na.rm=TRUE)
+  #   )
+  # ) %>%
+  kable() %>%
+  column_spec(3, color="white", background = "black")
+
+# penguins %>%
+#   group_by(species) %>%
+#   filter(
+#     bill_length_mm < quantile(bill_length_mm, 0.1, na.rm=TRUE)
+#     # bill_depth_mm |
+#     # flipper_length_mm |
+#     # body_mass_g |
+#   ) %>%
+#   `colnames<-`(gsub(" ", " ", colnames(penguins_fr))) %>%
+#   kable_fr() %>%
+#   column_spec(3:6, width = "4.5em")
+
+```
+
 ### Sommaire statistiques?
 
 ```{r}
@@ -600,7 +743,7 @@ ggplot(sifted) +
 
 Les \adelie{}s et \chinstrap{}s sont ensuite similaires en terme de masse. Les \gentoo{}s, quants à eux, pèsent considérablement plus à `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Adelie",]$mean, 2)` fois la masse des \adelie{}s et `{r} round(penguin_mass_avgs[penguin_mass_avgs$species == "Gentoo",]$mean / penguin_mass_avgs[penguin_mass_avgs$species == "Chinstrap",]$mean, 2)` fois la masse des \chinstrap{}s. Les \gentoo{}s sont donc, en moyenne, les pingouins les plus pesants de Palmer^[Supposant que les espèces \adelie{}, \chinstrap{} et \gentoo{} sont les seules espèces de l'archipel Palmer.]
 
-Il se trouve également que les écarts types des mâles sont tous plus hautes que ceux des femelles; les mâles se trouvent dans les basses à moyennes trentaines tandis que les femelles se trouvent dans les hautes vingtaines. Il y a ainsi une plus grande variation de masse pour les mâles de chaque espèce. Notez, toutefois, que cette tendence pourrait être le résultat d'un échantillon de taille minime. Les divisions ayant peu d'échantillonnés contiennent des points seuls aux extrémités (pas necéssairement des points abbérants) de manière similaire aux points normaux de divisions ayant des échantillons plus complets. Sur cette idée, les divisions ayant le plus grand écart type de leur sexe proviennent des \chinstrap{}s, qui ont le moins de pingouins échantillonnés. Il se pourrait donc que le sexe soit corrélé à une plus grande variation de masse, mais les variations de tailles d'échantillon de chaque division me prévient de faire une telle assumption.
+Il se trouve également que les écarts types des mâles sont tous plus hautes que ceux des femelles; les mâles se trouvent dans les basses à moyennes trentaines tandis que les femelles se trouvent dans les hautes vingtaines. Il y a ainsi une plus grande variation de masse pour les mâles de chaque espèce. Notez, toutefois, que cette tendence pourrait être le résultat d'un échantillon de taille minime. Les divisions ayant peu d'échantillonnés contiennent des points seuls aux extrémités (pas necéssairement des points aberrants) de manière similaire aux points normaux de divisions ayant des échantillons plus complets. Sur cette idée, les divisions ayant le plus grand écart type de leur sexe proviennent des \chinstrap{}s, qui ont le moins de pingouins échantillonnés. Il se pourrait donc que le sexe soit corrélé à une plus grande variation de masse, mais les variations de tailles d'échantillon de chaque division me prévient de faire une telle assumption.
 
 ### Quelle est la relation entre les dimensions du bec?
 
