@@ -659,8 +659,6 @@ L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dre
 
 La @fig-freq-isle suggère également que les \adelie{}s sont la seule des trois espèces à se situer sur plus d'une des îles mesurées. Il se pourrait plusieurs raisons pour ceci, par exemple une préférence nomade, mais sans des recherches plus approfondies c'est entièrement incertain. Il est à noter qu'à l'exception de l'île Torgersen, les \adelie{}s forment la minoritée et ne sont donc l'espèce pinguinale primaire que sur une des trois îles.
 
-### Quelles sont les relations entre le sexe, l'espèce et l'île?
-
 ### X- Quelle est la relation entre le sexe et la masse, et l'espèce et la masse?
 
 ```{r}
