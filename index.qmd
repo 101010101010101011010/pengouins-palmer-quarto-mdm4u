@@ -71,7 +71,7 @@ format_d <- function(x) {
   return(x)
 }
 
-kable_fr <- function(x) {
+kable_fr <- function(x, ...) {
   # Alignement selon la type de valeur
   alignment <- ""
   for(i in 1:ncol(x)) {
@@ -84,7 +84,7 @@ kable_fr <- function(x) {
 
   x %>%
     mutate_all(~format_d(.)) %>%
-    kable(align=alignment, "pipe")
+    kable(align=alignment, "pipe", ...)
 }
 
 decimal_hook <- function (x) {
@@ -241,103 +241,35 @@ Les valeurs aberrantes sont traités selon l'espèce.
 Une valeur aberrante est défini en tant qu'une valeur non contenue entre Q1 - 1,5(IIQ) et Q3 + 1,5(IIQ).
 :::
 
-<!-- #| label: tbl-sd
+```{r}
+#| label: tbl-aberrantes-minmax
 #| exho: FALSE
-#| tbl-cap: 'Les écarts types'
+#| tbl-cap: "Les bords de ce qui n'est pas une valeur aberrante pour chaque variable quantitative continue, groupé par espèce."
 #| out-width: '100%'
 #| tbl-align: 'center'
-#| layout-ncol: 2
-#| tbl-subcap:
-#|    - "Longueur du bec (mm)"
-#|    - "Profondeur du bec (mm)"
-#|    - "Longueure de la nageoire (mm)"
-#|    - "Masse corporelle (kg)" -->
-::: {#tbl-aberrvars layout-ncol=2}
-
-```{r}
-#| tbl-cap: "Les bords de ce qui n'est pas une longueur du bec (mm) aberrante"
-
-penguins %>%
-  group_by(species) %>%
-  select(bill_length_mm) %>%
-  summarise_all(
-    list(
-      sd = ~sd(., na.rm=TRUE),
-      q1 = ~quantile(., 0.25, na.rm=TRUE),
-      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
-      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
-    )
-  ) %>%
-  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
-  kable_fr() %>%
-  column_spec(2:5, width = "2.1em")
-
-```
-
-``` {r}
-#| tbl-cap: "Profondeur du bec (mm)"
-
-penguins %>%
-  group_by(species) %>%
-  select(bill_depth_mm) %>%
-  summarise_all(
-    list(
-      sd = ~sd(., na.rm=TRUE),
-      q1 = ~quantile(., 0.25, na.rm=TRUE),
-      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
-      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
-    )
-  ) %>%
-  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
-  kable_fr() %>%
-  column_spec(2:5, width = "2.1em")
-
-```
-
-``` {r}
-#| tbl-cap: "Longueure de la nageoire (mm)"
-
-penguins %>%
-  group_by(species) %>%
-  select(flipper_length_mm) %>%
-  summarise_all(
-    list(
-      sd = ~sd(., na.rm=TRUE),
-      q1 = ~quantile(., 0.25, na.rm=TRUE),
-      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
-      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
-    )
-  ) %>%
-  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
-  kable_fr() %>%
-  column_spec(2:5, width = "2.1em")
-
-```
-
-```{r}
-#| tbl-cap: "Masse corporelle (kg)"
 
 penguins %>%
   mutate(
-    body_mass_g = body_mass_g / 1000,
+    body_mass_g = body_mass_g / 1000
   ) %>%
   group_by(species) %>%
-  select(body_mass_g) %>%
-  summarise_all(
-    list(
-      sd = ~sd(., na.rm=TRUE),
-      q1 = ~quantile(., 0.25, na.rm=TRUE),
-      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - 1.5*sd(., na.rm=TRUE)),
-      max_ab = ~(quantile(., 0.25, na.rm=TRUE) + 1.5*sd(., na.rm=TRUE))
+  select(bill_length_mm:body_mass_g) %>%
+  summarise(across(
+    .fns=list(
+      min_ab = ~(quantile(., 0.25, na.rm=TRUE) - (1.5*sd(., na.rm=TRUE))),
+      max_ab = ~(quantile(., 0.75, na.rm=TRUE) + (1.5*sd(., na.rm=TRUE)))
     )
-  ) %>%
-  `colnames<-`(c("Espèce", "Écart type", "Q1", "Min. aberrante", "Max. aberrante")) %>%
-  kable_fr() %>%
-  column_spec(2:5, width = "2.1em")
+  )) %>%
+  kable_fr("latex", col.names = c("Espèce", rep(c("Min.", "Max."), 4))) %>%
+  add_header_above(
+    header=c(" ", 
+      "Longueur du\nbec (mm)"=2, 
+      "Profondeur du\nbec (mm)"=2,
+      "Longueure de la\nnageoire (mm)"=2,
+      "Masse corporelle\n(kg)"=2)
+  )
 
 ```
-
-:::
 
 ```{r}
 #| label: tbl-aberrantes
