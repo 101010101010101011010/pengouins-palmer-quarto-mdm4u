@@ -238,6 +238,9 @@ Les valeurs aberrantes sont traités selon l'espèce.
 :::
 
 ::: {.callout-tip}
+
+## Valeur aberrante
+
 Une valeur est souvant considérée aberrante lorsqu'elle n'est pas contenue entre Q1 - 1,5(IIQ) et Q3 + 1,5(IIQ).
 :::
 
