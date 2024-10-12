@@ -773,7 +773,9 @@ dfTab <-
     x = min((penguins %>% filter(!is.na(bill_length_mm)))$bill_length_mm) + ifelse(species == "Adelie", 0, ifelse(species == "Chinstrap", 10, 20)),
     y = max(bill_depth_mm) + 0.1,
     r = cor(bill_length_mm, bill_depth_mm),
-    r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared
+    r2 = summary(lm(bill_depth_mm ~ bill_length_mm))$r.squared,
+    beta0 = lm(bill_depth_mm ~ bill_length_mm)$coefficients["(Intercept)"],
+    beta1 = lm(bill_depth_mm ~ bill_length_mm)$coefficients["bill_length_mm"]
   ) %>%
   arrange(species) %>%
   filter(row_number()==1)
@@ -785,7 +787,8 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
 
   geom_text(data=dfTab,aes(color=species, label=species, x=x, y=24),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
   geom_text(data=dfTab,aes(color=species, label=sprintf("R^2 == %.2f", r2), x=x, y=23.4),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
-  geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x, y=22.4),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+  geom_text(data=dfTab,aes(color=species, label=sprintf("r == %.2f", r), x=x+5, y=23.2),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
+  geom_text(data=dfTab,aes(color=species, label=sprintf("hat(y)(x) == %.2f + %.2f(x)", beta0, beta1), x=x, y=22.4),parse=TRUE, hjust=0, vjust=1, show_guide=FALSE) +
 
   # Thèmes
   penguin_colour_scale() +
