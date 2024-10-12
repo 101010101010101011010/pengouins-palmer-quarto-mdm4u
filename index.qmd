@@ -752,16 +752,13 @@ Il se trouve également que les écarts types des mâles sont tous plus hautes q
 
 En comparant
 
-```{r fig-dots-longbecnage, echo=FALSE, fig.cap='La longueure de la nageoire pour la profondeur du bec, la longuer du bec et l\'espèce', out.width='100%', fig.align='center'}
+```{r fig-dots-longprofbec, echo=FALSE, fig.cap='La profondeur du bec selon la longuer du bec et l\'espèce', out.width='100%', fig.align='center'}
 
 sifted <-
   penguins %>%
-  mutate(
-    flipper_length_mm = flipper_length_mm / 10
-  ) %>%
   filter(
     !is.na(bill_length_mm) &
-    !is.na(flipper_length_mm)
+    !is.na(bill_depth_mm)
   )
 
 dfTab <-
@@ -796,11 +793,77 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
 
   # Renomer tout
   labs(
-    title = "Longueure de la nageoire pour la profondeur\net longuer du bec et l'espèce",
+    title = "La profondeur du bec selon la longuer du bec et l'espèce",
     x = "Longueur du bec (mm)",
     y = "Profondeur du bec (mm)",
-    colour = "Espèce",
-    size = "Longueure de la\nnageoire (cm)"
+    colour = "Espèce"
+  )
+```
+
+```{r}
+#| label: fig-residu-longprofbec-ade
+#| echo: FALSE
+#| fig-cap: "Les résidus lors de l'estimation des valeurs de la la profondeur du bec en utilisant la longuer du bec."
+#| fig-subcap:
+#|    - "Les résidus des \\adelie{}s."
+#|    - "Les résidus des \\chinstrap{}s."
+#|    - "Les résidus des \\gentoo{}s."
+#| out-width: '100%'
+#| fig-align: 'center'
+#| layout-nrow: 2
+
+sifted <-
+  penguins %>%
+  filter(
+    species=="Adelie"
+  )
+
+ggplot(lm(data=sifted, bill_depth_mm ~ bill_length_mm), aes(x = .fitted, y = .resid)) +
+  geom_point(colour=penguin_colours[sifted$species[1]]) +
+  geom_hline(yintercept = 0) +
+
+  # Renomer tout
+  labs(
+    title = "Les résidus lors de l'estimation de la profondeur du bec\ndes pingouins Adélies avec la longuer du bec.",
+    x = "Longueur du bec (mm)",
+    y = "Résidu (mm)",
+    colour = "Espèce"
+  )
+
+sifted <-
+  penguins %>%
+  filter(
+    species=="Chinstrap"
+  )
+
+ggplot(lm(data=sifted, bill_depth_mm ~ bill_length_mm), aes(x = .fitted, y = .resid)) +
+  geom_point(colour=penguin_colours[sifted$species[1]]) +
+  geom_hline(yintercept = 0) +
+
+  # Renomer tout
+  labs(
+    title = "Les résidus lors de l'estimation de la profondeur du bec\ndes pingouins Chinstrap avec la longuer du bec.",
+    x = "Longueur du bec (mm)",
+    y = "Résidu (mm)",
+    colour = "Espèce"
+  )
+
+sifted <-
+  penguins %>%
+  filter(
+    species=="Gentoo"
+  )
+
+ggplot(lm(data=sifted, bill_depth_mm ~ bill_length_mm), aes(x = .fitted, y = .resid)) +
+  geom_point(colour=penguin_colours[sifted$species[1]]) +
+  geom_hline(yintercept = 0) +
+
+  # Renomer tout
+  labs(
+    title = "Les résidus lors de l'estimation de la profondeur du bec\ndes pingouins Adélies avec la longuer du bec.",
+    x = "Longueur du bec (mm)",
+    y = "Résidu (mm)",
+    colour = "Espèce"
   )
 ```
 
