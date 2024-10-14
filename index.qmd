@@ -822,6 +822,9 @@ ggplot(lm(data=sifted, bill_depth_mm ~ bill_length_mm), aes(x = .fitted, y = .re
   geom_point(colour=penguin_colours[sifted$species[1]]) +
   geom_hline(yintercept = 0) +
 
+  # Image (y)
+  coord_cartesian(ylim = c(-3, 3)) +
+
   # Renomer tout
   labs(
     title = "Les résidus lors de l'estimation de la profondeur du bec\ndes pingouins Adélies avec la longuer du bec.",
@@ -840,6 +843,9 @@ ggplot(lm(data=sifted, bill_depth_mm ~ bill_length_mm), aes(x = .fitted, y = .re
   geom_point(colour=penguin_colours[sifted$species[1]]) +
   geom_hline(yintercept = 0) +
 
+  # Image (y)
+  coord_cartesian(ylim = c(-3, 3)) +
+
   # Renomer tout
   labs(
     title = "Les résidus lors de l'estimation de la profondeur du bec\ndes pingouins Chinstrap avec la longuer du bec.",
@@ -857,6 +863,9 @@ sifted <-
 ggplot(lm(data=sifted, bill_depth_mm ~ bill_length_mm), aes(x = .fitted, y = .resid)) +
   geom_point(colour=penguin_colours[sifted$species[1]]) +
   geom_hline(yintercept = 0) +
+
+  # Image (y)
+  coord_cartesian(ylim = c(-3, 3)) +
 
   # Renomer tout
   labs(
