@@ -142,7 +142,7 @@ penguins_fr <-
     sex = ifelse(sex == "male", "Mâle", ifelse(sex == "female", "Femelle", sex))
   )
 
-colnames(penguins_fr) <- c("Espèce", "Isle", "Longueur du bec (mm)", "Profondeur du bec (mm)", "Longueure de la nageoire (mm)", "Masse corporelle (kg)", "Sexe", "Année")
+colnames(penguins_fr) <- c("Espèce", "Isle", "Longueur du bec (mm)", "Profondeur du bec (mm)", "Longueur de la nageoire (mm)", "Masse corporelle (kg)", "Sexe", "Année")
 ```
 
 MDM4U-01
@@ -173,7 +173,7 @@ Une variable numérique continue dénotant la longueur du bec du pingouin mesur�
 
 Une variable numérique continue dénotant la profondeur du bec du pingouin mesuré, en millimètres.
 
-### Longueure de la nageoire (mm) --- `flipper_length_mm`
+### Longueur de la nageoire (mm) --- `flipper_length_mm`
 
 Une variable numérique continue, arrondie à l'unité près, dénotant la longueur de la nageoire du pingouin mesuré, en millimètres.
 
@@ -268,7 +268,7 @@ penguins %>%
     header=c(" ", 
       "Longueur du\nbec (mm)"=2, 
       "Profondeur du\nbec (mm)"=2,
-      "Longueure de la\nnageoire (mm)"=2,
+      "Longueur de la\nnageoire (mm)"=2,
       "Masse corporelle\n(kg)"=2)
   )
 
@@ -330,7 +330,7 @@ penguins %>%
 ```{r}
 #| label: tbl-aberrantes-group-3
 #| exho: FALSE
-#| tbl-cap: "Les pingouins aberrantes, soit hors des bornes indiquées par le [Tableau @tbl-aberrantes-minmax], en groupant par espèce et par sélectionnant lorsque la variable `Longueure de la nageoire (mm)` abèrre. Les cellules ayant un arrière-plan noir et du texte blanc indiquent une valeur aberrante."
+#| tbl-cap: "Les pingouins aberrantes, soit hors des bornes indiquées par le [Tableau @tbl-aberrantes-minmax], en groupant par espèce et par sélectionnant lorsque la variable `Longueur de la nageoire (mm)` abèrre. Les cellules ayant un arrière-plan noir et du texte blanc indiquent une valeur aberrante."
 #| out-width: '100%'
 #| tbl-align: 'center'
 
@@ -604,7 +604,7 @@ ggplot(sifted) +
   labs(
     title = "Longueurs de nageoires par rapport à l'espèce",
     x = "Espèce",
-    y = "Longueure de la nageoire (mm)",
+    y = "Longueur de la nageoire (mm)",
     colour = "Sexe"
   )
 ```
@@ -897,13 +897,23 @@ sifted <-
 
 Passant à la validité des modèles linéaires, d'abord, chacun des trois diagrammes de résidus dans la [Figure @fig-residu-longprofbec] ne présente aucun motif discernable. Ceci suggère que le bon type de modèle, soit la régression linéaire, a été choisi. Également, les échantillons de chaque sont suffisamment grands, ayant `{r} sifted %>% filter(species=="Adelie") %>% nrow()`, `{r} sifted %>% filter(species=="Chinstrap") %>% nrow()`, et `{r} sifted %>% filter(species=="Gentoo") %>% nrow()` pingouins pour les \adelie{}s, \chinstrap{}s et \gentoo{}s; ils dépassent chacuns la taille d'échantillon pseudo-magique de 30. Ensuite, les moyennes des résidus absolus sont de `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Adelie"), bill_depth_mm ~ bill_length_mm))))`, `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Chinstrap"), bill_depth_mm ~ bill_length_mm))))`, et `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Gentoo"), bill_depth_mm ~ bill_length_mm))))`, ce qui est assez raisonnable quand les profondeurs se reposent entre `{r} min(sifted$bill_depth_mm)`mm et `{r} max(sifted$bill_depth_mm)`mm. Je dirais donc que les modèles linéaires des \chinstrap{}s et \gentoo{}s sont plutôt fiables et que celle des \adelie{}s est moyennement fiable.
 
-### Est-ce qu'il y a des tendances temporelles?
+### X- Est-ce qu'il y a des tendances temporelles?
 
-En plaçant chacune des variables numériques et des calculées en fonction du temps, telles que dans la @fig-mass-overtime, la @fig-nage-overtime, et la @fig-pop-overtime, il n'y a remarquablement peu de corrélation évidente.
+En plaçant chacune des variables numériques et des calculées en fonction du temps, tel que dans la [Figure @fig-overtime], il n'y a remarquablement peu de corrélation évidente.
 
 3 années comme étendu temporelle, ayant des séparations discrètes par année, ne me permet pas de tirer des conclusions valides correliant l'année à une autre variable. Il y aura une trop forte incertitude dans tous cas, et l'interpolation ainsi que l'extrapolation ne serviront pas.
 
-```{r fig-mass-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
+```{r}
+#| label: fig-overtime
+#| echo: FALSE
+#| fig-cap: "Les variables et calculés selon le temps."
+#| fig-subcap:
+#|    - "La masse corporelle des pinguins Palmer selon le temps et l'espèce. Les sommets de chaque droite sont placés à la moyenne pour l'espèce durant l'année indiquée."
+#|    - "La longueur de la nageoire des pinguins Palmer selon le temps et l'espèce. Les sommets de chaque droite sont placés à la moyenne pour l'espèce durant l'année indiquée."
+#|    - "La population de chaque espèce de pinguin Palmer, selon le temps."
+#| out-width: '100%'
+#| fig-align: 'center'
+#| layout-nrow: 2
 
 sifted <-
   penguins %>%
@@ -957,10 +967,12 @@ ggplot(sifted, aes(year, body_mass_g)) +
     x = "Année",
     y = "Masse corporelle (kg)",
     colour = "Espèce"
-  )
-```
+  ) +
 
-```{r fig-nage-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
+  # Enlever la légende
+  theme(legend.position="none")
+
+#####################################################################
 
 sifted <-
   penguins %>%
@@ -1009,16 +1021,16 @@ ggplot(sifted, aes(year, flipper_length_mm)) +
 
   # Renomer tout
   labs(
-    title = "Longueure de la nageoire par espèce, selon le temps",
+    title = "Longueur de la nageoire par espèce, selon le temps",
     x = "Année",
-    y = "Longueure de la nageoire (cm)",
+    y = "Longueur de la nageoire (cm)",
     colour = "Espèce"
-  )
-```
+  ) +
 
-```{r fig-pop-overtime, echo=FALSE, fig.cap='TODO: Delete', out.width='100%', fig.align='center'}
+  # Enlever la légende
+  theme(legend.position="none")
 
-# TODO: Delete
+#####################################################################
 
 sifted <-
   penguins %>%
