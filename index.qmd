@@ -18,6 +18,7 @@ bibliography:
 nocite: |
   @*
 notebook-links: false
+toc-title: "Table des matières"
 ---
 
 ```{r}
@@ -153,7 +154,7 @@ M. Chabot
 
 {{< pagebreak >}}
 
-## X- Variables
+## Variables
 
 Il y a 8 variables dont les données ont été récoltés par la station Palmer:
 
@@ -195,7 +196,7 @@ Une variable numérique *discrète, donnée à l'unité près, indiquant l'anné
 Les valeurs manquantes ne sont enlevés que lorsqu'elles interfèrent directement avec les calculs. Par exemple, la moyenne de 1 + NA n'est pas une valeur valide. Ainsi, dans un graphique contenant deux variables, les entrées ayant des valeurs manquantes dans au moins une *des deux variables* seront exlus.
 :::
 
-### X- Est-ce qu'il y a des valeurs manquantes?
+### Analyse de valeurs manquantes
 
 En plaçant chaque pingouin manquant une ou plusieurs mesures dans un même tableau, comme dans le [Tableau @tbl-nalist], plusieurs patrons se mettent en évidence.
 
@@ -231,7 +232,7 @@ Prenant suite, il y a plusieurs pingouins sans sexe assigné. Plusieurs raisons 
 
 Il est également à noter que chaque année d'échantillonage comprend au minimum une valeur manquante et que la première année en comprend le plus. Plusieurs renseignements au sujet de la situation des chercheurs — tels que la présence d'une erreure systématique provoquant des données invalides (NA) ou un manque de préparation lors de la première année — pourraient être déduits, toutefois cela me paraîtrait une extrapolation étant donné le peu d'étendu de temps et le peu de contexte.
 
-### X- Est-ce qu'il y a des valeurs aberrantes?
+### Analyse de valeurs aberrantes
 
 ::: {.callout-note}
 Les valeurs aberrantes sont traités selon l'espèce.
@@ -584,7 +585,7 @@ ggplot(sifted) +
 
 D’autres pingouins pourraient également être considérés comme aberrants, toutefois je ne vois pas assez de déviation en leurs valeurs pour en conclure ainsi.
 
-### Sommaire statistiques?
+### Tableaux de sommaire statistique
 
 ```{r}
 #| label: tbl-som-qualquant
@@ -668,7 +669,7 @@ numeric_df %>%
 
 ```
 
-### X- Quelle île héberge le plus de pingouins, et quel et la relation entre les espèces et l'île?
+### Quelle île héberge le plus de pingouins, et quel et la relation entre les espèces et l'île?
 
 L'île hébergeant le plus de pinguoins peut être estimée en manière d'un histogramme de fréquence, comme dans la @fig-freq-isle.
 
@@ -718,7 +719,7 @@ L'île Biscoe comporte `{r} bis_drea_isle_diff` pingouins de plus que l'île Dre
 
 La @fig-freq-isle suggère également que les \adelie{}s sont la seule des trois espèces à se situer sur plus d'une des îles mesurées. Il se pourrait plusieurs raisons pour ceci, par exemple une préférence nomade, mais sans des recherches plus approfondies c'est entièrement incertain. Il est à noter qu'à l'exception de l'île Torgersen, les \adelie{}s forment la minoritée et ne sont donc l'espèce pinguinale primaire que sur une des trois îles.
 
-### X- Quelle est la relation entre le sexe et la masse, et l'espèce et la masse?
+### Quelle est la relation entre le sexe et la masse, et l'espèce et la masse?
 
 ```{r}
 # Moyennes des masses de chaque espèce, à utiliser en-texte
@@ -807,7 +808,7 @@ Les \adelie{}s et \chinstrap{}s sont ensuite similaires en terme de masse. Les \
 
 Il se trouve également que les écarts types des mâles sont tous plus hautes que ceux des femelles; les mâles se trouvent dans les basses à moyennes trentaines tandis que les femelles se trouvent dans les hautes vingtaines. Il y a ainsi une plus grande variation de masse pour les mâles de chaque espèce. Notez, toutefois, que cette tendence pourrait être le résultat d'un échantillon de taille minime. Les divisions ayant peu d'échantillonnés contiennent des points seuls aux extrémités (pas necéssairement des points aberrants) de manière similaire aux points normaux de divisions ayant des échantillons plus complets. Sur cette idée, les divisions ayant le plus grand écart type de leur sexe proviennent des \chinstrap{}s, qui ont le moins de pingouins échantillonnés. Il se pourrait donc que le sexe soit corrélé à une plus grande variation de masse, mais les variations de tailles d'échantillon de chaque division me prévient de faire une telle assumption.
 
-### X- Quelle est la relation entre les dimensions du bec?
+### Quelle est la relation entre les dimensions du bec?
 
 Nous pouvons d'abord placer les deux dimensions du bec de chaque pingouin Palmer sous forme de nuage de point comme dans la [Figure @fig-dots-longprofbec], colorée selon l'espèce. Chacune des droites présente des tendances positives, puis la profondeur du bec augmente d'environ 1mm pour chaque 5mm de longueur de bec. L'augmentation de profondeur de bec par la longueur n'est donc pas très dissimilaire entre les trois espèces.
 
@@ -956,7 +957,7 @@ sifted <-
 
 Passant à la validité des modèles linéaires, d'abord, chacun des trois diagrammes de résidus dans la [Figure @fig-residu-longprofbec] ne présente aucun motif discernable. Ceci suggère que le bon type de modèle, soit la régression linéaire, a été choisi. Également, les échantillons de chaque sont suffisamment grands, ayant `{r} sifted %>% filter(species=="Adelie") %>% nrow()`, `{r} sifted %>% filter(species=="Chinstrap") %>% nrow()`, et `{r} sifted %>% filter(species=="Gentoo") %>% nrow()` pingouins pour les \adelie{}s, \chinstrap{}s et \gentoo{}s; ils dépassent chacuns la taille d'échantillon pseudo-magique de 30. Ensuite, les moyennes des résidus absolus sont de `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Adelie"), bill_depth_mm ~ bill_length_mm))))`, `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Chinstrap"), bill_depth_mm ~ bill_length_mm))))`, et `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Gentoo"), bill_depth_mm ~ bill_length_mm))))`, ce qui est assez raisonnable quand les profondeurs se reposent entre `{r} min(sifted$bill_depth_mm)`mm et `{r} max(sifted$bill_depth_mm)`mm. Je dirais donc que les modèles linéaires des \chinstrap{}s et \gentoo{}s sont plutôt fiables et que celle des \adelie{}s est moyennement fiable.
 
-### X- Est-ce qu'il y a des tendances temporelles?
+### Est-ce qu'il y a des tendances temporelles?
 
 En plaçant chacune des variables numériques et des calculées en fonction du temps, tel que dans la [Figure @fig-overtime], il n'y a remarquablement peu de corrélation évidente.
 
