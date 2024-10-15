@@ -88,16 +88,16 @@ kable_fr <- function(x, ...) {
 }
 
 decimal_hook <- function (x) {
-  if (is.numeric(x)) {
-    # If integer, print without decimal; otherwise print two places
+  if (is.numeric(x) | is.double(x) | is.integer(x)) {
+    # Si un entier, imprimer sans ponctuation decimale; autrement ajouter deux chiffres décimaux
     res <- ifelse(x == round(x),
       sprintf("%d", x),
       str_replace_all(sprintf("%.2f", x), "[.]", ",")
     )
     paste(res, collapse = ", ")
+  } else {
+    inline_hook_old(x)
   }
-
-  inline_hook_old(x)
 }
 
 knit_hooks$set(inline = decimal_hook)
@@ -748,9 +748,9 @@ Les \adelie{}s et \chinstrap{}s sont ensuite similaires en terme de masse. Les \
 
 Il se trouve également que les écarts types des mâles sont tous plus hautes que ceux des femelles; les mâles se trouvent dans les basses à moyennes trentaines tandis que les femelles se trouvent dans les hautes vingtaines. Il y a ainsi une plus grande variation de masse pour les mâles de chaque espèce. Notez, toutefois, que cette tendence pourrait être le résultat d'un échantillon de taille minime. Les divisions ayant peu d'échantillonnés contiennent des points seuls aux extrémités (pas necéssairement des points aberrants) de manière similaire aux points normaux de divisions ayant des échantillons plus complets. Sur cette idée, les divisions ayant le plus grand écart type de leur sexe proviennent des \chinstrap{}s, qui ont le moins de pingouins échantillonnés. Il se pourrait donc que le sexe soit corrélé à une plus grande variation de masse, mais les variations de tailles d'échantillon de chaque division me prévient de faire une telle assumption.
 
-### Quelle est la relation entre les dimensions du bec?
+### X- Quelle est la relation entre les dimensions du bec?
 
-En comparant
+Nous pouvons d'abord placer les deux dimensions du bec de chaque pingouin Palmer sous forme de nuage de point comme dans la [Figure @fig-dots-longprofbec], colorée selon l'espèce. Chacune des droites présente des tendances positives, puis la profondeur du bec augmente d'environ 1mm pour chaque 5mm de longueur de bec. L'augmentation de profondeur de bec par la longueur n'est donc pas très dissimilaire entre les trois espèces.
 
 ```{r fig-dots-longprofbec, echo=FALSE, fig.cap='La profondeur du bec selon la longuer du bec et l\'espèce', out.width='100%', fig.align='center'}
 
@@ -800,8 +800,18 @@ ggplot(sifted, aes(bill_length_mm, bill_depth_mm)) +
   )
 ```
 
+Un point qui diffère entre les espèces est la profondeur du bec estimé lorsque la longueur du bec est de 0mm, soit l'ordonnée à l'origine. D'abord, il est à noter qu'une longueur de 0mm est une extrapolation en raison du manque de données plus petits que 30mm et, plus important encore, une longueur de bec de 0mm n'est pas faisable; le bec n'existerait simplement pas et n'aurait aucune dimension. Continuant, l'ordonnée à l'origine des droites les mieux ajustées des \adelie{}s, \chinstrap{}s et \gentoo{}s sont de 11,41, 7,57 et 5,25 respectivement. Il y a ainsi, prévisiblement, de grandes différences entre les profondeurs de becs de chaque espèce lorsque les longueurs de becs sont les mêmes.
+
 ```{r}
-#| label: fig-residu-longprofbec-ade
+r2_adelie <- summary(lm(data=sifted %>% filter(species == "Adelie"), bill_depth_mm ~ bill_length_mm))$r.squared
+r2_chinstrap <- summary(lm(data=sifted %>% filter(species == "Chinstrap"), bill_depth_mm ~ bill_length_mm))$r.squared
+r2_gentoo <- summary(lm(data=sifted %>% filter(species == "Gentoo"), bill_depth_mm ~ bill_length_mm))$r.squared
+```
+
+Un deuxième point distinguant les espèces est la représentation de la longueur du bec dans la profondeur. Pour les \adelie{}s, `{r} 100 * r2_adelie`% de la variation de profondeur du bec est expliquée par la longueur du bec, soit une force relative faible. Les \chinstrap{}s et \gentoo{}s, quant à eux, décrivent `{r} 100 * r2_chinstrap`% et `{r} 100 * r2_gentoo`%, respectivement, de la variation de la profondeur avec la longueur, soit une force relative moyenne. Les adélies présentent donc environ `{r} round(100 * ((r2_chinstrap + r2_gentoo)/2 - r2_adelie))`% moins de représentativité avec leur droite la mieux ajustée, leur estimateur. Supposant qu'une causalité n'existe pas entre les deux dimensions du bec, mais plutôt qu'il y a des causes communes entre les deux, la profondeur du bec des \adelie{}s est plausiblement affectée plus fortement par une variable qui n'affecte pas autant la longueur du bec. Cette variable n'aurait pas autant d'impact sur la profondeur des \chinstrap{}s et \gentoo{}s. Une telle variable pourrait provenir du fait que les \adelie{}s se situent sur chacune des trois îles, comme démontré dans la [Figure @fig-freq-isle], tandis que les deux autres espèces en restent sur une seule. Il se pourrait que la profondeur du bec des \adelie{}s a un plus grand impact sur leur survie sur les trois îles que la longueur du bec, par exemple pour la chasse de poissons variés.
+
+```{r}
+#| label: fig-residu-longprofbec
 #| echo: FALSE
 #| fig-cap: "Les résidus lors de l'estimation des valeurs de la la profondeur du bec en utilisant la longuer du bec."
 #| fig-subcap:
@@ -875,6 +885,17 @@ ggplot(lm(data=sifted, bill_depth_mm ~ bill_length_mm), aes(x = .fitted, y = .re
     colour = "Espèce"
   )
 ```
+
+```{r}
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(bill_length_mm) &
+    !is.na(bill_depth_mm)
+  )
+```
+
+Passant à la validité des modèles linéaires, d'abord, chacun des trois diagrammes de résidus dans la [Figure @fig-residu-longprofbec] ne présente aucun motif discernable. Ceci suggère que le bon type de modèle, soit la régression linéaire, a été choisi. Également, les échantillons de chaque sont suffisamment grands, ayant `{r} sifted %>% filter(species=="Adelie") %>% nrow()`, `{r} sifted %>% filter(species=="Chinstrap") %>% nrow()`, et `{r} sifted %>% filter(species=="Gentoo") %>% nrow()` pingouins pour les \adelie{}s, \chinstrap{}s et \gentoo{}s; ils dépassent chacuns la taille d'échantillon pseudo-magique de 30. Ensuite, les moyennes des résidus absolus sont de `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Adelie"), bill_depth_mm ~ bill_length_mm))))`, `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Chinstrap"), bill_depth_mm ~ bill_length_mm))))`, et `{r} mean(abs(resid(lm(data=sifted %>% filter(species == "Gentoo"), bill_depth_mm ~ bill_length_mm))))`, ce qui est assez raisonnable quand les profondeurs se reposent entre `{r} min(sifted$bill_depth_mm)`mm et `{r} max(sifted$bill_depth_mm)`mm. Je dirais donc que les modèles linéaires des \chinstrap{}s et \gentoo{}s sont plutôt fiables et que celle des \adelie{}s est moyennement fiable.
 
 ### Est-ce qu'il y a des tendances temporelles?
 
