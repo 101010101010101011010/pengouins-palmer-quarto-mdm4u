@@ -231,18 +231,13 @@ Prenant suite, il y a plusieurs pingouins sans sexe assigné. Plusieurs raisons 
 
 Il est également à noter que chaque année d'échantillonage comprend au minimum une valeur manquante et que la première année en comprend le plus. Plusieurs renseignements au sujet de la situation des chercheurs — tels que la présence d'une erreure systématique provoquant des données invalides (NA) ou un manque de préparation lors de la première année — pourraient être déduits, toutefois cela me paraîtrait une extrapolation étant donné le peu d'étendu de temps et le peu de contexte.
 
-### Est-ce qu'il y a des valeurs aberrantes?
+### X- Est-ce qu'il y a des valeurs aberrantes?
 
 ::: {.callout-note}
 Les valeurs aberrantes sont traités selon l'espèce.
 :::
 
-::: {.callout-tip}
-
-## Valeur aberrante
-
-Une valeur est souvant considérée aberrante lorsqu'elle n'est pas contenue entre Q1 - 1,5(IIQ) et Q3 + 1,5(IIQ).
-:::
+D’abord, il est à noter qu’une valeur est souvent considérée aberrante lorsqu’elle n’est pas contenue entre Q1 - 1,5(IIQ) et Q3 + 1,5(IIQ). Ces minimums et maximums de valeurs non aberrantes, groupés par espèce, sont présentés dans le [Tableau @tbl-aberrantes-minmax]. En les utilisant afin de filtrer ceux qui en sont contenus dans le tout des données, seules les valeurs qui se trouvent à l’extérieur, soit potentiellement des valeurs aberrantes, ne restent. Ces valeurs hors du normal, présentées dans les Tableaux [-@tbl-aberrantes-group-1], [-@tbl-aberrantes-group-2], [-@tbl-aberrantes-group-3], et [-@tbl-aberrantes-group-4], sont en forte abondance. Il n’est donc peu probable que ce soient toutes des valeurs aberrantes.
 
 ```{r}
 #| label: tbl-aberrantes-minmax
@@ -381,6 +376,214 @@ penguins %>%
 
 ```
 
+En visualisant les distributions avec des diagrammes à violon, comme dans la [Figure @fig-violin], une majorité des points précédemment suggérés aberrante semblent être raisonnablement distancés selon la distribution approximativement normale / bimodale. Une exception à ceci, visible dans la [Figure @fig-violin-1], est le point maximal de la longueur du bec des \gentoo{}s qui est, d’abord, très éloigné de son prochain et, ensuite, est dans un ensemble asymétrique. Ceci suggère fortement qu’elle soit une valeur aberrante.
+
+```{r}
+#| label: fig-violin
+#| echo: FALSE
+#| fig-cap: "Distributions des variables quantitatives continues des pingouins Palmer selon l'espèce. Les barres rouges indiquent l'allonge de l'écart type, les lignes noires horizontales de chaque violon indiquent les quartiles, et les points rouges sont les moyennes."
+#| fig-subcap:
+#|    - "Longueurs de becs des pingouins Palmer selon l'espèce."
+#|    - "Profondeurs de becs des pingouins Palmer selon l'espèce."
+#|    - "Longueurs de nageoires des pingouins Palmer selon l'espèce."
+#|    - "Masses corporelles des pingouins Palmer selon l'espèce."
+#| out-width: '100%'
+#| fig-align: 'center'
+#| layout-nrow: 2
+
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(bill_length_mm)
+  )
+
+dfTab <- sifted %>% group_by(species) %>%
+  summarize(
+    y = max(bill_length_mm) + 1,
+    mean = mean(bill_length_mm),
+    sd = round(sd(bill_length_mm), digits = 2)
+  )
+
+ggplot(sifted) +
+  # Diagrammes
+  geom_violin(aes(species, bill_length_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(species, bill_length_mm, colour = sex), width = 0.3, alpha = 0.2) +
+
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Thèmes
+  theme(
+    legend.position = c(0.10, 0.80),
+    legend.background = element_rect(colour = "black")
+  ) +
+  theme(
+    panel.grid.major.y = element_line(color = "#00000011"),
+    panel.grid.minor.y = element_line(color = "#0000000f"),
+  ) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
+  labs(
+    title = "Longueurs de becs par rapport à l'espèce",
+    x = "Espèce",
+    y = "Longueur du bec (mm)",
+    colour = "Sexe"
+  )
+
+#####################################################################################
+
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(bill_depth_mm)
+  )
+
+dfTab <- sifted %>% group_by(species) %>%
+  summarize(
+    y = max(bill_depth_mm) + 0.2,
+    mean = mean(bill_depth_mm),
+    sd = round(sd(bill_depth_mm), digits = 2)
+  )
+
+ggplot(sifted) +
+  # Diagrammes
+  geom_violin(aes(species, bill_depth_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(species, bill_depth_mm, colour = sex), width = 0.3, alpha = 0.2) +
+  
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Thèmes
+  theme(
+    legend.position = "none",
+    legend.background = element_rect(colour = "black")
+  ) +
+  theme(
+    panel.grid.major.y = element_line(color = "#00000011"),
+    panel.grid.minor.y = element_line(color = "#0000000f"),
+  ) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
+  labs(
+    title = "Profondeurs de becs par rapport à l'espèce",
+    x = "Espèce",
+    y = "Profondeur du bec (mm)",
+    colour = "Sexe"
+  )
+
+#####################################################################################
+
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(flipper_length_mm)
+  )
+
+dfTab <-
+  sifted %>%
+  group_by(
+    species
+  ) %>%
+  summarize(
+    y = max(flipper_length_mm) + 2,
+    mean = mean(flipper_length_mm),
+    sd = round(sd(flipper_length_mm), digits = 2)
+  )
+
+ggplot(sifted) +
+  # Diagrammes
+  geom_violin(aes(species, flipper_length_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(species, flipper_length_mm, colour = sex), width = 0.3, alpha = 0.2) +
+  
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Thèmes
+  theme(
+    legend.position = "none",
+    legend.background = element_rect(colour = "black")
+  ) +
+  theme(
+    panel.grid.major.y = element_line(color = "#00000011"),
+    panel.grid.minor.y = element_line(color = "#0000000f"),
+  ) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
+  labs(
+    title = "Longueurs de nageoires par rapport à l'espèce",
+    x = "Espèce",
+    y = "Longueur de la nageoire (mm)",
+    colour = "Sexe"
+  )
+
+#####################################################################################
+
+sifted <-
+  penguins %>%
+  filter(
+    !is.na(body_mass_g)
+  ) %>%
+  mutate(
+    body_mass_g = body_mass_g/1000
+  )
+
+dfTab <-
+  sifted %>%
+  group_by(
+    species
+  ) %>%
+  summarize(
+    y = max(body_mass_g) + 0.1,
+    mean = mean(body_mass_g),
+    sd = round(sd(body_mass_g), digits = 2)
+  )
+
+ggplot(sifted) +
+  # Diagrammes
+  geom_violin(aes(species, body_mass_g), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
+  geom_quasirandom(aes(species, body_mass_g, colour = sex), width = 0.3, alpha = 0.2) +
+  
+  # Écart type / barres d'érreure
+  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
+  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
+  # Anotation de l'écart type
+  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
+
+  # Thèmes
+  theme(
+    legend.position = "none",
+    legend.background = element_rect(colour = "black")
+  ) +
+  theme(
+    panel.grid.major.y = element_line(color = "#00000011"),
+    panel.grid.minor.y = element_line(color = "#0000000f"),
+  ) +
+
+  # Anotations
+  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
+  labs(
+    title = "Masse corporelle par rapport à l'espèce",
+    x = "Espèce",
+    y = "Masse corporelle (kg)",
+    colour = "Sexe"
+  )
+
+```
+
+D’autres pingouins pourraient également être considérés comme aberrants, toutefois je ne vois pas assez de déviation en leurs valeurs pour en conclure ainsi.
+
 ### Sommaire statistiques?
 
 ```{r}
@@ -463,150 +666,6 @@ colnames(numeric_df) <- c("Moyenne", "Min", "Q1", "Médiane", "Q3", "Max", "Éca
 numeric_df %>%
   kable_fr()
 
-```
-
-### Min, moyenne, médiane, mode, max, quartiles, écart type.
-
-```{r fig-violin-beclon, exho=FALSE, fig.cap='Longueurs de becs des pingouins Palmer, selon l\'espèce. Les barres rouges indiquent l\'allonge de l\'écart type, les lignes noires horizontales de chaque violon indiquent les quartiles, et les points rouges sont les moyennes.', out.width='100%', fig.align='center'}
-
-sifted <-
-  penguins %>%
-  filter(
-    !is.na(bill_length_mm)
-  )
-
-dfTab <- sifted %>% group_by(species) %>%
-  summarize(
-    y = max(bill_length_mm) + 1,
-    mean = mean(bill_length_mm),
-    sd = round(sd(bill_length_mm), digits = 2)
-  )
-
-ggplot(sifted) +
-  # Diagrammes
-  geom_violin(aes(species, bill_length_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_quasirandom(aes(species, bill_length_mm, colour = sex), width = 0.3, alpha = 0.2) +
-
-  # Écart type / barres d'érreure
-  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
-  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
-  # Anotation de l'écart type
-  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
-
-  # Thèmes
-  theme(
-    legend.position = c(0.10, 0.80),
-    legend.background = element_rect(colour = "black")
-  ) +
-  theme(
-    panel.grid.major.y = element_line(color = "#00000011"),
-    panel.grid.minor.y = element_line(color = "#0000000f"),
-  ) +
-
-  # Anotations
-  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
-  labs(
-    title = "Longueurs de becs par rapport à l'espèce",
-    x = "Espèce",
-    y = "Longueur du bec (mm)",
-    colour = "Sexe"
-  )
-```
-
-```{r fig-violin-becprof, exho=FALSE, fig.cap='Profondeurs de becs des pingouins Palmer, selon l\'espèce. Les barres rouges indiquent l\'allonge de l\'écart type, les lignes noires horizontales de chaque violon indiquent les quartiles, et les points rouges sont les moyennes.', out.width='100%', fig.align='center'}
-
-sifted <-
-  penguins %>%
-  filter(
-    !is.na(bill_depth_mm)
-  )
-
-dfTab <- sifted %>% group_by(species) %>%
-  summarize(
-    y = max(bill_depth_mm) + 0.2,
-    mean = mean(bill_depth_mm),
-    sd = round(sd(bill_depth_mm), digits = 2)
-  )
-
-ggplot(sifted) +
-  # Diagrammes
-  geom_violin(aes(species, bill_depth_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_quasirandom(aes(species, bill_depth_mm, colour = sex), width = 0.3, alpha = 0.2) +
-  
-  # Écart type / barres d'érreure
-  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
-  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
-  # Anotation de l'écart type
-  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
-
-  # Thèmes
-  theme(
-    legend.position = c(0.90, 0.80),
-    legend.background = element_rect(colour = "black")
-  ) +
-  theme(
-    panel.grid.major.y = element_line(color = "#00000011"),
-    panel.grid.minor.y = element_line(color = "#0000000f"),
-  ) +
-
-  # Anotations
-  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
-  labs(
-    title = "Profondeurs de becs par rapport à l'espèce",
-    x = "Espèce",
-    y = "Profondeur du bec (mm)",
-    colour = "Sexe"
-  )
-```
-
-```{r fig-violin-nagelon, exho=FALSE, fig.cap='Longueurs de nageoires des pingouins Palmer, selon l\'espèce. Les barres rouges indiquent l\'allonge de l\'écart type, les lignes noires horizontales de chaque violon indiquent les quartiles, et les points rouges sont les moyennes.', out.width='100%', fig.align='center'}
-
-sifted <-
-  penguins %>%
-  filter(
-    !is.na(flipper_length_mm)
-  )
-
-dfTab <-
-  sifted %>%
-  group_by(
-    species
-  ) %>%
-  summarize(
-    y = max(flipper_length_mm) + 2,
-    mean = mean(flipper_length_mm),
-    sd = round(sd(flipper_length_mm), digits = 2)
-  )
-
-ggplot(sifted) +
-  # Diagrammes
-  geom_violin(aes(species, flipper_length_mm), staplewidth = 0.5, draw_quantiles = c(0.25, 0.5, 0.75)) +
-  geom_quasirandom(aes(species, flipper_length_mm, colour = sex), width = 0.3, alpha = 0.2) +
-  
-  # Écart type / barres d'érreure
-  geom_errorbar(data=dfTab, aes(x=species, y=mean, ymin=mean-sd, ymax=mean+sd), width=.2, linewidth=.3, colour="red") +
-  geom_point(data=dfTab, aes(x=species, y=mean), size=0.5, colour="red") +
-  # Anotation de l'écart type
-  geom_text(data=dfTab,aes(x=species,y=y,parse=FALSE,label=sprintf("s = %.2f", dfTab$sd)),vjust=0) +
-
-  # Thèmes
-  theme(
-    legend.position = c(0.90, 0.25),
-    legend.background = element_rect(colour = "black")
-  ) +
-  theme(
-    panel.grid.major.y = element_line(color = "#00000011"),
-    panel.grid.minor.y = element_line(color = "#0000000f"),
-  ) +
-
-  # Anotations
-  scale_colour_discrete(labels = c("Femelle", "Mâle", "N/A")) +
-  labs(
-    title = "Longueurs de nageoires par rapport à l'espèce",
-    x = "Espèce",
-    y = "Longueur de la nageoire (mm)",
-    colour = "Sexe"
-  )
 ```
 
 ### X- Quelle île héberge le plus de pingouins, et quel et la relation entre les espèces et l'île?
